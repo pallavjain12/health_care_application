@@ -6,15 +6,10 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 @RestController
 @CrossOrigin
@@ -33,7 +28,6 @@ public class RegisteringController {
 
         String generateOTPURL = "https://dev.abdm.gov.in/gateway/v0.5/users/auth/init";
         String authToken = SessionUtil.getAccessToken();
-        // String authToken = "temp";
         if (authToken.equals("-1")) return "ABDM not reachable";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -57,7 +51,6 @@ public class RegisteringController {
         headers.set("X-CM-ID", "sbx");
         HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
         restTemplate.postForObject(generateOTPURL, entity, String.class);
-
         while(gotResponse == 0);
         System.out.println("webHookresponse in generate_otp = \n"+webHookResponse);
 
@@ -75,12 +68,9 @@ public class RegisteringController {
 
     @PostMapping("/v0.5/users/auth/on-confirm")
     public void postConfirmOTP(@RequestBody String responseBody) {
-        System.out.println("OTP RequestReceved");
-        System.out.println(responseBody);
         webHookOTPResponse = responseBody;
         gotOTPResponse = 1;
     }
-    @CrossOrigin
     @RequestMapping("/confirm_otp")
     public String confirmOtp(@RequestParam String otp, @RequestParam String txnId) {
         gotOTPResponse = 0;
@@ -112,6 +102,20 @@ public class RegisteringController {
         while(gotOTPResponse == 0);
 
         JSONObject responseFromWebhook = new JSONObject(webHookOTPResponse);
-        return responseFromWebhook.toString();
+        JSONObject response = new JSONObject();
+
+        JSONObject auth = (JSONObject) responseFromWebhook.get("auth");
+        JSONObject patient = (JSONObject) auth.get("patient");
+
+        response.put("name", patient.get("name"));
+        response.put("id", patient.get("id"));
+        response.put("gender", patient.get("gender"));
+        response.put("dayOfBirth", patient.get("dayOfBirth"));
+        response.put("monthOfBirth", patient.get("monthOfBirth"));
+        response.put("yearOfBirth", patient.get("yearOfBirth"));
+
+        response.put("address", patient.get("address"));
+        response.put("identifiers", patient.get("identifiers"));
+        return response.toString();
     }
 }
