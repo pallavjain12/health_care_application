@@ -116,6 +116,9 @@ public class RegisteringController {
 
         response.put("address", patient.get("address"));
         response.put("identifiers", patient.get("identifiers"));
+
+        // addCareContext();
+
         return response.toString();
     }
 }
