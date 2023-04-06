@@ -1,7 +1,10 @@
 package com.example.demo.controllers;
 
+import com.example.demo.model.Patient;
+import com.example.demo.repository.PatientRepository;
 import com.example.demo.utility.SessionUtil;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -11,10 +14,14 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static com.example.demo.helper.misc.addCareContext;
+
 @RestController
 @CrossOrigin
 public class RegisteringController {
 
+    @Autowired
+    PatientRepository patientRepository;
     int gotResponse = 0;
     int gotOTPResponse = 0;
     String webHookResponse = null;
@@ -117,8 +124,24 @@ public class RegisteringController {
         response.put("address", patient.get("address"));
         response.put("identifiers", patient.get("identifiers"));
 
-        // addCareContext();
+        Patient tempPatient = new Patient();
+
+        tempPatient.setGender(patient.get("gender").toString());
+        tempPatient.setDayOfBirth(Integer.parseInt(patient.get("dayOfBirth").toString()));
+        tempPatient.setMonthOfBirth(Integer.parseInt(patient.get("monthOfBirth").toString()));
+        tempPatient.setYearOfBirth(Integer.parseInt(patient.get("yearOfBirth").toString()));
+        tempPatient.setName(patient.get("name").toString());
+
+        Patient saved = patientRepository.save(tempPatient);
+
+        addCareContext(auth.get("accessToken").toString(), patient.get("name").toString(), "" + saved.getId());
 
         return response.toString();
+    }
+
+    @PostMapping("/v0.5/links/link/on-add-contexts")
+    public void onAddCareContexts(@RequestBody String response) {
+        System.out.println(response);
+        System.out.flush();
     }
 }

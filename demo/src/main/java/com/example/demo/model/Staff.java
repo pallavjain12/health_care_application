@@ -11,9 +11,19 @@ public class Staff {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
+    private  String abhaId;
     private String category;
     private String name;
-    private String email;
+
+    public String getAbhaId() {
+        return abhaId;
+    }
+
+    public void setAbhaId(String abhaId) {
+        this.abhaId = abhaId;
+    }
+
     private String phone;
 
     public Long getId() {
@@ -38,14 +48,6 @@ public class Staff {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getPhone() {
