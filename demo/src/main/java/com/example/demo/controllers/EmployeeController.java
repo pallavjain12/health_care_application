@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import com.example.demo.constants.StringConstants;
 import com.example.demo.model.Employee;
 import com.example.demo.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,16 @@ public class EmployeeController {
     public String getAllEmployees() {
         try {
             return employeeService.getAllEmployees();
+        }
+        catch (Exception e) {
+            return serverSideError(e.toString());
+        }
+    }
+
+    @GetMapping("/login")
+    public String login(@RequestBody HashMap<String, String> map) {
+        try {
+            return employeeService.loginCredentialsCheck(map.get(StringConstants.EMAIL), map.get(StringConstants.PASSWORD));
         }
         catch (Exception e) {
             return serverSideError(e.toString());

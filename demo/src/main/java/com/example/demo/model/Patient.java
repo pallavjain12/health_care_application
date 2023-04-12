@@ -40,6 +40,8 @@ public class Patient {
     @Column(nullable = false)
     private String gender;
 
+    private LocalDate registrationDateTime;
+
     public long getId() { return id; }
 
     public String getName() { return name; }
@@ -58,7 +60,9 @@ public class Patient {
 
     public int getYearOfBirth() { return yearOfBirth; }
 
-    public String gender() { return gender; }
+    public String getGender() { return gender; }
+
+    public LocalDate getRegistrationDateTime() { return registrationDateTime; }
     public void setId(int id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setAbhaId(String abhaId) { this.abhaId = abhaId; }

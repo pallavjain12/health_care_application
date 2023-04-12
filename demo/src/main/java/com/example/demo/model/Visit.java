@@ -6,21 +6,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class Staff {
+public class Visit {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
+
 }
-
-/*
-admin
-doctor
-front-desk
-patient
-
-employee
-appointment
-patientRecords
-Reports
-Credentials
-*/

@@ -9,5 +9,7 @@ public class StringConstants {
     public static final String FRONTDESK = "frontdesk";
     public static final String Doctor = "doctor";
     public static final String ADMIN = "admin";
+    public static final String EMAIL = "email";
+    public static final String PASSWORD = "password";
 
 }

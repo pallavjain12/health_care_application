@@ -45,4 +45,24 @@ public class EmployeeService {
             return serverSideError(e.toString());
         }
     }
+
+    public String loginCredentialsCheck(String email, String password) {
+        try {
+            Employee employee = employeeRepository.findEmployeeByEmail(email);
+            if (employee == null) {
+                return serverSideError("Invalid email or password");
+            }
+            else {
+                if (employee.isValidPassword(password)) {
+                    return employee.toString();
+                }
+                else {
+                    return serverSideError("Invalid email or password");
+                }
+            }
+        }
+        catch (Exception e) {
+            return serverSideError(e.toString());
+        }
+    }
 }
