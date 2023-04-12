@@ -127,7 +127,6 @@ public class RegisteringController {
         Patient tempPatient = new Patient();
 
         tempPatient.setGender(patient.get("gender").toString());
-        tempPatient.setDayOfBirth(Integer.parseInt(patient.get("dayOfBirth").toString()));
         tempPatient.setMonthOfBirth(Integer.parseInt(patient.get("monthOfBirth").toString()));
         tempPatient.setYearOfBirth(Integer.parseInt(patient.get("yearOfBirth").toString()));
         tempPatient.setName(patient.get("name").toString());
