@@ -10,6 +10,4 @@ public class Visit {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-
-
 }

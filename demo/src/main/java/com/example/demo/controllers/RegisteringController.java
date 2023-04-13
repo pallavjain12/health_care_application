@@ -29,42 +29,43 @@ public class RegisteringController {
     @RequestMapping("/generate_otp")
     @CrossOrigin
     public String generateOtp(@RequestParam String hid) throws InterruptedException {
-        gotResponse = 0;
-        String timestamp = ZonedDateTime.now( ZoneOffset.UTC ).format( DateTimeFormatter.ISO_INSTANT );
-
-
-        String generateOTPURL = "https://dev.abdm.gov.in/gateway/v0.5/users/auth/init";
-        String authToken = SessionUtil.getAccessToken();
-        if (authToken.equals("-1")) return "ABDM not reachable";
-
-        RestTemplate restTemplate = new RestTemplate();
-
-        JSONObject request = new JSONObject();
-        request.put("requestId", java.util.UUID.randomUUID());
-        request.put("timestamp", timestamp);
-            JSONObject query = new JSONObject();
-            query.put("id", hid);
-            query.put("purpose", "KYC_AND_LINK");
-            query.put("authMode", "MOBILE_OTP");
-                JSONObject requester = new JSONObject();
-                requester.put("type", "HIP");
-                requester.put("id", "team-29-hip-1");
-            query.put("requester", requester);
-        request.put("query", query);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(authToken);
-        headers.set("X-CM-ID", "sbx");
-        HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
-        restTemplate.postForObject(generateOTPURL, entity, String.class);
-        while(gotResponse == 0);
-        System.out.println("webHookresponse in generate_otp = \n"+webHookResponse);
-
-        JSONObject responseFromWebhook = new JSONObject(webHookResponse);
-        System.out.println(responseFromWebhook);
-        JSONObject auth = (JSONObject) responseFromWebhook.get("auth");
-        return (String)auth.get("transactionId");
+        return "use new api";
+        //        gotResponse = 0;
+//        String timestamp = ZonedDateTime.now( ZoneOffset.UTC ).format( DateTimeFormatter.ISO_INSTANT );
+//
+//
+//        String generateOTPURL = "https://dev.abdm.gov.in/gateway/v0.5/users/auth/init";
+//        String authToken = SessionUtil.getAccessToken();
+//        if (authToken.equals("-1")) return "ABDM not reachable";
+//
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        JSONObject request = new JSONObject();
+//        request.put("requestId", java.util.UUID.randomUUID());
+//        request.put("timestamp", timestamp);
+//            JSONObject query = new JSONObject();
+//            query.put("id", hid);
+//            query.put("purpose", "KYC_AND_LINK");
+//            query.put("authMode", "MOBILE_OTP");
+//                JSONObject requester = new JSONObject();
+//                requester.put("type", "HIP");
+//                requester.put("id", "team-29-hip-1");
+//            query.put("requester", requester);
+//        request.put("query", query);
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        headers.setBearerAuth(authToken);
+//        headers.set("X-CM-ID", "sbx");
+//        HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
+//        restTemplate.postForObject(generateOTPURL, entity, String.class);
+////        while(gotResponse == 0);
+//        System.out.println("webHookresponse in generate_otp = \n"+webHookResponse);
+//
+//        JSONObject responseFromWebhook = new JSONObject(webHookResponse);
+//        System.out.println(responseFromWebhook);
+//        JSONObject auth = (JSONObject) responseFromWebhook.get("auth");
+//        return (String)auth.get("transactionId");
     }
 
     @PostMapping("/v0.5/users/auth/on-init")

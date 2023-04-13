@@ -11,5 +11,7 @@ public class StringConstants {
     public static final String ADMIN = "admin";
     public static final String EMAIL = "email";
     public static final String PASSWORD = "password";
+    public static final String ABHAID = "abha_id";
+    public static final String ABHANUMBER = "abha_number";
 
 }

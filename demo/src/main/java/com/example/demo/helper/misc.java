@@ -14,8 +14,17 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 public class misc {
+
+    public static String getTimeStamp() {
+        return ZonedDateTime.now( ZoneOffset.UTC ).format( DateTimeFormatter.ISO_INSTANT );
+    }
+
+    public static UUID getRandomUUID() {
+        return java.util.UUID.randomUUID();
+    }
     public static String addCareContext(String patientAuthToken, String name, String id) {
         String timestamp = ZonedDateTime.now( ZoneOffset.UTC ).format( DateTimeFormatter.ISO_INSTANT );
         String addCareContext = "https://dev.abdm.gov.in/gateway/v0.5/links/link/add-contexts";
