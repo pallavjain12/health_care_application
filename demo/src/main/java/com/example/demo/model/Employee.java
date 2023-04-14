@@ -29,7 +29,7 @@ public class Employee {
     private boolean isActive;
 
     public boolean isValidPassword(String password) {
-        return password == this.password;
+        return password.equals(this.password);
     }
 
     public long getId() { return id; }
@@ -58,17 +58,18 @@ public class Employee {
         obj.put("id", getId());
         obj.put("name", getName());
         obj.put("mobile", getMobile());
+        obj.put("email", getEmail());
         obj.put("type", getRole());
         return obj.toString();
     }
 
     public JSONObject toJSONObject() {
         JSONObject employee = new JSONObject();
-        employee.put("id", id);
-        employee.put("name", name);
-        employee.put("email", email);
-        employee.put("role", role);
-        employee.put("mobile", mobile);
+        employee.put("id", getId());
+        employee.put("name", getName());
+        employee.put("email", getName());
+        employee.put("role", getRole());
+        employee.put("mobile", getMobile());
         return employee;
     }
 }

@@ -1,13 +1,19 @@
 package com.example.demo.helper.Service;
 
+import com.example.demo.model.Patient;
+import com.example.demo.service.VisitService;
 import org.json.JSONObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static com.example.demo.helper.misc.getRandomUUID;
 import static com.example.demo.helper.misc.getTimeStamp;
 
 public class PatientServiceHelper {
+    VisitService visitService;
     public static JSONObject prepareGenerateOTPEntity(String abhaId) {
         JSONObject request = new JSONObject();
         request.put("requestId", getRandomUUID());
@@ -52,5 +58,21 @@ public class PatientServiceHelper {
         headers.setBearerAuth(authToken);
         headers.set("X-CM-ID", "sbx");
         return headers;
+    }
+
+    public static Patient createNewPatient(JSONObject request) {
+        Patient patient = new Patient();
+        patient.setAbhaId(request.getString("id"));
+        patient.setName(request.getString("name"));
+        patient.setGender(request.getString("gender"));
+        patient.setYearOfBirth(request.getString("yearOfBirth"));
+        patient.setMonthOfBirth(request.getString("monthOfBirth"));
+        patient.setDateOfBirth(request.getString("dayOfBirth"));
+        patient.setRegistrationDateTime(LocalDate.now());
+        for (Object obj : request.keySet()) {
+            if (!request.isNull(obj.toString()) && obj.toString().equals("mobile")) patient.setMobile(obj.toString());
+            if (!request.isNull(obj.toString()) && obj.toString().equals("abhaNumber")) patient.setAbhaNumber(obj.toString());
+        }
+        return patient;
     }
 }

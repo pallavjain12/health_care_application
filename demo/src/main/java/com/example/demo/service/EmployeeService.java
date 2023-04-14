@@ -28,12 +28,11 @@ public class EmployeeService {
     }
 
     public String getEmployeeById(long id) {
-        Optional<Employee> employee = employeeRepository.findById(id);
-        String str = employee.get().toString();
-        if (str == null) {
+        Employee employee = employeeRepository.findEmployeeById(id);
+        if (employee == null) {
             return serverSideError("No Employee found with id: " + id);
         }
-        return str;
+        return employee.toString();
     }
 
     public String getAllEmployees() {
@@ -49,10 +48,14 @@ public class EmployeeService {
     public String loginCredentialsCheck(String email, String password) {
         try {
             Employee employee = employeeRepository.findEmployeeByEmail(email);
+            System.out.println("check answer");
+            System.out.println(employee == null);
             if (employee == null) {
+                System.out.println(employee.toJSONObject());
                 return serverSideError("Invalid email or password");
             }
             else {
+                System.out.println(employee.getEmail());
                 if (employee.isValidPassword(password)) {
                     return employee.toString();
                 }

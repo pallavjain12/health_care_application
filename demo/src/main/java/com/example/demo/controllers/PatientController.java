@@ -2,11 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.constants.StringConstants;
 import com.example.demo.service.PatientService;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -23,21 +19,24 @@ public class PatientController {
     SseEmitter generateOTP(@RequestBody HashMap<String, String> requestParams) {
         String abhaId = requestParams.get(StringConstants.ABHAID);
         SseEmitter sseEmitter = new SseEmitter(Long.MAX_VALUE);
+
+        String reqId = patientService.fireABDMGenerateOTP(abhaId);
+
+        if (reqId == null) {
+            throw new RuntimeException();
+        }
+
         try {
             sseEmitter.send(SseEmitter.event().name("connectionSuccessfull"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String reqId = patientService.fireABDMGenerateOTP(abhaId);
 
         /*
             TODO:
                 Do something about this.
                 if session token not received, code do not know what to do.
          */
-        if (reqId == null) {
-            throw new RuntimeException();
-        }
         emittersMap.put(reqId, sseEmitter);
         return sseEmitter;
     }
@@ -57,9 +56,9 @@ public class PatientController {
     }
 
     @PostMapping("/confirm-otp")
-    public SseEmitter confirmOTP(@RequestBody HashMap<String, String> reuest) {
-        String transactionId = reuest.get("transactionId");
-        String otp = reuest.get("otp");
+    public SseEmitter confirmOTP(@RequestBody HashMap<String, String> request) {
+        String transactionId = request.get("transactionId");
+        String otp = request.get("otp");
 
         SseEmitter sseEmitter = new SseEmitter(Long.MAX_VALUE);
         try {

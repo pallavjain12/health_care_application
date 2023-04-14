@@ -5,6 +5,8 @@ import org.json.JSONObject;
 
 import java.time.Period;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Patient {
@@ -25,22 +27,24 @@ public class Patient {
     @Column(unique = true)
     private String email;
 
-    @Column
+    @Column(unique = true)
     private String mobile;
 
     @Column
-    private int dateOfBirth;
+    private String dateOfBirth;
 
     @Column
-    private int monthOfBirth;
+    private String monthOfBirth;
 
     @Column
-    private int yearOfBirth;
+    private String yearOfBirth;
 
     @Column(nullable = false)
     private String gender;
-
+    @Column
     private LocalDate registrationDateTime;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<Visit> visits = new ArrayList<>();
 
     public long getId() { return id; }
 
@@ -54,11 +58,11 @@ public class Patient {
 
     public String getMobile() { return mobile; }
 
-    public int getDateOfBirth() { return dateOfBirth; }
+    public String getDateOfBirth() { return dateOfBirth; }
 
-    public int getMonthOfBirth() { return monthOfBirth; }
+    public String getMonthOfBirth() { return monthOfBirth; }
 
-    public int getYearOfBirth() { return yearOfBirth; }
+    public String getYearOfBirth() { return yearOfBirth; }
 
     public String getGender() { return gender; }
 
@@ -69,9 +73,9 @@ public class Patient {
     public void setAbhaNumber(String abhaNumber) { this.abhaNumber = abhaNumber; }
     public void setEmail(String email) { this.email = email; }
     public void setMobile(String mobile) { this.mobile = mobile; }
-    public void setDateOfBirth(int dateOfBirth) { this.dateOfBirth = dateOfBirth; }
-    public void setMonthOfBirth(int monthOfBirth) { this.monthOfBirth = monthOfBirth; }
-    public void setYearOfBirth(int yearOfBirth) { this.yearOfBirth = yearOfBirth; }
+    public void setDateOfBirth(String dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+    public void setMonthOfBirth(String monthOfBirth) { this.monthOfBirth = monthOfBirth; }
+    public void setYearOfBirth(String yearOfBirth) { this.yearOfBirth = yearOfBirth; }
     public void setGender(String gender) { this.gender = gender; }
     public String getDOBString() {
         return this.dateOfBirth + "/" + this.monthOfBirth + "/" + this.yearOfBirth;
@@ -90,6 +94,18 @@ public class Patient {
         else {
             return 0;
         }
+    }
+
+    public void setRegistrationDateTime(LocalDate registrationDateTime) {
+        this.registrationDateTime = registrationDateTime;
+    }
+
+    public List<Visit> getVisits() {
+        return visits;
+    }
+
+    public void addVisits(Visit visit) {
+        this.visits.add(visit);
     }
 
     public String toString() {

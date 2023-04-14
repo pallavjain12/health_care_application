@@ -4,6 +4,8 @@ import com.example.demo.abdm.Util.TokenUtil;
 import com.example.demo.abdm.api.APIList;
 import com.example.demo.constants.StringConstants;
 import com.example.demo.helper.Service.PatientServiceHelper;
+import com.example.demo.model.Patient;
+import com.example.demo.model.Visit;
 import com.example.demo.repository.PatientRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,6 +14,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import static com.example.demo.helper.Service.PatientServiceHelper.createNewPatient;
 
 
 @Service
@@ -73,20 +77,26 @@ public class PatientService {
 
     public String[] prepareOnConfirmOTPResponse(String response) {
         String[] ans = new String[2];
+
         JSONObject obj = new JSONObject(response);
         JSONObject auth = obj.getJSONObject("auth");
         JSONObject resp = obj.getJSONObject("resp");
         JSONObject respond = new JSONObject();
-        respond.put("accessToken", auth.getString("accessToken"));
 
-        JSONObject patient =  auth.getJSONObject("patient");
-        JSONArray identifiers = auth.getJSONArray("identifiers");
-        for (Object identifier : identifiers) {
-               JSONObject temp = (JSONObject) identifier;
-               if (temp.get("type").equals("MOBILE")) patient.put("mobile", temp.get("value"));
-               if (temp.get("type").equals("HEALTH_NUMBER")) patient.put("abhaNumber", temp.get("value"));
+        JSONObject patientObj =  auth.getJSONObject("patient");
+        JSONArray identifiersObj = auth.getJSONArray("identifiers");
+
+        for (Object identifier : identifiersObj) {
+            JSONObject temp = (JSONObject) identifier;
+            if (!temp.isNull("value") && obj.toString().equals("MOBILE")) patientObj.put("mobile", temp.getString("value"));
+            if (!temp.isNull(obj.toString()) && obj.toString().equals("HEALTH_NUMBER")) patientObj.put("abhaNumber", temp.getString("value"));
         }
-        respond.put("patient", patient);
+
+        Patient newPatient = patientRepository.findPatientByAbhaId(patientObj.getString("id"));
+        newPatient = (newPatient != null) ? newPatient : patientRepository.save(createNewPatient(patientObj));
+
+
+        respond.put("patient", newPatient);
         ans[0] = resp.get("requestId").toString();
         ans[1] = respond.toString();
         return ans;

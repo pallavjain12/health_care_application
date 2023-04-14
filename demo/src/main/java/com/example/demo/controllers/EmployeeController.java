@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.constants.StringConstants;
 import com.example.demo.model.Employee;
 import com.example.demo.service.EmployeeService;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,9 +30,9 @@ public class EmployeeController {
     }
 
     @GetMapping("/employee")
-    public String getEmployee(@RequestBody long id) {
+    public String getEmployee(@RequestBody HashMap<String, String> request) {
         try {
-            return employeeService.getEmployeeById(id);
+            return employeeService.getEmployeeById(Long.parseLong(request.get("id")));
         }
         catch (Exception e) {
             return serverSideError(e.toString());
