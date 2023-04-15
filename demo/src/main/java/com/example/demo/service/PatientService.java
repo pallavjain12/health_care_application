@@ -43,7 +43,7 @@ public class PatientService {
         JSONObject obj = new JSONObject(response);
         JSONObject respond = new JSONObject();
 
-        if (obj.get("error").toString().equals("null")) {
+        if (!obj.isNull("error")) {
             respond.put(StringConstants.STATUS, StringConstants.UNSUCCESSFULL);
             respond.put(StringConstants.MSG, obj.getJSONObject("error").get("message").toString());
         }
@@ -75,6 +75,43 @@ public class PatientService {
         return request.get("requestId").toString();
     }
 
+    /*
+        {
+          "requestId": "18305fa9-03e0-45a6-ac0d-f870e0e3b116",
+          "timestamp": "2023-03-26T05:52:20.054624235",
+          "auth": {
+            "accessToken": "eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiJwYWxsYXZqYWluQHNieCIsInJlcXVlc3RlclR5cGUiOiJISVAiLCJyZXF1ZXN0ZXJJZCI6InRlYW0tMjktaGlwLTEiLCJwYXRpZW50SWQiOiJwYWxsYXZqYWluQHNieCIsInNlc3Npb25JZCI6IjVhZjFiMjg4LThlMjUtNDk1OS1hNmY1LTBmMzMxMzc5NDlhMiIsImV4cCI6MTY3OTg5NjMzOSwiaWF0IjoxNjc5ODA5OTM5fQ.MhKXcVGwNGNqRl8N3ehU1gIptf4jgBHpy-0L3LCDRx0LADJgADVeCghn5lp6Kyw02b1bUBodpNGGOzgg6Muws1UFVwdNMZqCPJ6NN3APjahraQMu8dNRFvVC-nvY4vKETczefKi-RHnmLPZkb7w9UeTen5s2-1rs5vjnm7IxRAlpzntV1j-mhQd-LtL3xG1JvhXVySbAh9HWVKKgfe0GDS5mIO8RorO1wah_DZg4pO7YVPtNSW5U8TKWCXMQfzx2eG6fKKCfPZiTkBIS5NxH1wJcLCIQigXyS6hH67hGvNSsow5yct7IC6jjG2ukIBNSfxtPj2VOiKt4uZfjugVpmg",
+            "patient": {
+              "id": "pallavjain@sbx",
+              "name": "Pallav Jain",
+              "gender": "M",
+              "yearOfBirth": 1998,
+              "monthOfBirth": 6,
+              "dayOfBirth": 15,
+              "address": {
+                "line": null,
+                "district": "DATIA",
+                "state": "MADHYA PRADESH",
+                "pincode": null
+              },
+              "identifiers": [
+                {
+                  "type": "MOBILE",
+                  "value": "8109629687"
+                },
+                {
+                  "type": "HEALTH_NUMBER",
+                  "value": "123-123123-12312"
+                }
+              ]
+            }
+          },
+          "error": null,
+          "resp": {
+            "requestId": "7a160772-9793-404d-b013-b28be537cd5c"
+          }
+        }
+     */
     public String[] prepareOnConfirmOTPResponse(String response) {
         String[] ans = new String[2];
 
@@ -84,21 +121,27 @@ public class PatientService {
         JSONObject respond = new JSONObject();
 
         JSONObject patientObj =  auth.getJSONObject("patient");
-        JSONArray identifiersObj = auth.getJSONArray("identifiers");
-
+        JSONArray identifiersObj = patientObj.getJSONArray("identifiers");
+        patientObj.put("mobile", "");
+        patientObj.put("abhaNumber", "");
         for (Object identifier : identifiersObj) {
             JSONObject temp = (JSONObject) identifier;
-            if (!temp.isNull("value") && obj.toString().equals("MOBILE")) patientObj.put("mobile", temp.getString("value"));
-            if (!temp.isNull(obj.toString()) && obj.toString().equals("HEALTH_NUMBER")) patientObj.put("abhaNumber", temp.getString("value"));
+            if (!temp.isNull("value") && temp.getString("type").toString().equals("MOBILE")) patientObj.put("mobile", temp.getString("value"));
+            if (!temp.isNull("value") && temp.getString("type").toString().equals("HEALTH_NUMBER")) patientObj.put("abhaNumber", temp.getString("value"));
         }
-
         Patient newPatient = patientRepository.findPatientByAbhaId(patientObj.getString("id"));
         newPatient = (newPatient != null) ? newPatient : patientRepository.save(createNewPatient(patientObj));
-
-
         respond.put("patient", newPatient);
+        respond.put("accessToken", auth.getString("accessToken"));
+
+        JSONObject finalObj = new JSONObject();
+        finalObj.put(StringConstants.STATUS, StringConstants.SUCCESSFULL);
+        finalObj.put(StringConstants.MSG, "Data fetched successfully");
+        finalObj.put(StringConstants.DATA, response);
+
         ans[0] = resp.get("requestId").toString();
-        ans[1] = respond.toString();
+        ans[1] = finalObj.toString();
+
         return ans;
     }
 }

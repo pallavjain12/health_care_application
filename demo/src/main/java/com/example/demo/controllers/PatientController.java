@@ -47,10 +47,12 @@ public class PatientController {
         SseEmitter emitter = emittersMap.get(respond[0]);
         try {
             emitter.send(SseEmitter.event().name("on-init").data(respond[1]));
+            emitter.complete();
             emittersMap.remove(respond[0]);
         }
         catch (Exception e) {
             System.out.println(e);
+            emitter.complete();
             emittersMap.remove(respond[0]);
         }
     }
@@ -79,10 +81,12 @@ public class PatientController {
         SseEmitter emitter = emittersMap.get(respond[0]);
         try {
             emitter.send(SseEmitter.event().name("on-confirm").data(respond[1]));
+            emitter.complete();
             emittersMap.remove(respond[0]);
         }
         catch (Exception e) {
             System.out.println(e);
+            emitter.complete();
             emittersMap.remove(respond[0]);
         }
     }

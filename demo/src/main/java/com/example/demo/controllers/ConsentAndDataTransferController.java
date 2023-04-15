@@ -1,9 +1,20 @@
 package com.example.demo.controllers;
 
+import com.example.demo.model.ConsentRequest;
+import org.json.JSONObject;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-public class ConsentAndDataTransfer {
+import com.example.demo.service.ConsentAndDataTransferService;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
+import java.util.HashMap;
+
+public class ConsentAndDataTransferController {
+    ConsentAndDataTransferService consentAndDataTransferService;
+    HashMap<String, SseEmitter> map = new HashMap<>();
     /*
     {
   "notification": {
@@ -186,69 +197,98 @@ public class ConsentAndDataTransfer {
 
     // Consent flow diagram
         // STEP 1: /consent-request/init -> ABDM
-        /*
-         {
-            "requestId": "{{$guid}}",
-            "timestamp": "{{$isoTimestamp}}",
-            "consent": {
-                "purpose": {
-                    "text": "Previous mediactions record",
-                    "code": "CAREMGT"
-                },
-                "patient": {
-                    "id": "pallavjain@sbx"
-                },
-                "hiu": {
-                    "id": "team-29-hiu-1"
-                },
-                "requester": {
-                    "name": "Dr. Saurabh Tripathi",
-                    "identifier": {
-                        "type": "REGNO",
-                        "value": "MH1001",
-                        "system": "https://www.mciindia.org"
-                    }
-                },
-                "hiTypes": [
-                    "OPConsultation"
-                ],
-                "permission": {
-                    "accessMode": "VIEW",
-                    "dateRange": {
-                        "from": "2022-09-25T12:52:34.925Z",
-                        "to": "2022-11-15T12:52:34.925Z"
-                    },
-                    "dataEraseAt": "2023-05-25T12:52:34.925Z",
-                    "frequency": {
-                        "unit": "HOUR",
-                        "value": 1,
-                        "repeats": 0
-                    }
-                }
-            }
+
+    /*
+        RequestBody will have :
+        {
+            patientId:      "102",
+            doctorId:       "1",
+            purpose:        "care management",
+            code:           "CAREMGT",
+            hiTypes:        [
+                                OPConsultation
+                            ]
+            accessMode:     "view",
+            dateTimeFrom:   ________
+            dateTimeTo:     ________
+            dateEraseAt:    ________
         }
-         */
+     */
 
-        // STEP 2: ABDM -> /consent-request/on-init
-        /*
-            {
-              "requestId": "8ac7fb54-6b8c-48cc-b064-60cc437fe187",
-              "timestamp": "2023-04-14T13:23:29.547906116",
-              "consentRequest": {
-                "id": "82caedec-d1cc-484a-b433-8ae236be7bd5"
-              },
-              "error": null,
-              "resp": {
-                "requestId": "f0df30f1-0875-4628-a721-0b86630c40d8"
+    @PostMapping("/consent-request/init")
+    @CrossOrigin
+    public SseEmitter consentRequestInit(@RequestBody String req) {
+        JSONObject tempConsentObject = consentAndDataTransferService.getConsentObject(req);
+        JSONObject requestObject = consentAndDataTransferService.getConsentInitObject(tempConsentObject);
+
+        if (!consentAndDataTransferService.saveConsentRequest(requestObject)) throw new RuntimeException();
+
+        SseEmitter sseEmitter = new SseEmitter(Long.MAX_VALUE);
+
+        try {
+            sseEmitter.send(SseEmitter.event().name("consent-request init"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        map.put(requestObject.getString("requestId"), sseEmitter);
+        return sseEmitter;
+
+    }
+    // STEP 2: ABDM -> /consent-request/on-init
+    @PostMapping("/v0.5/consent-requests/on-init")
+    @CrossOrigin
+    public void onConsentRequestInit(@RequestBody String responseBody) {
+        String[] response = consentAndDataTransferService.prepareOnConsentRequestInitResponse(responseBody);
+        SseEmitter sseEmitter = map.get(response[0]);
+        if (response[1] == null) {
+
+        }
+        else {
+            consentAndDataTransferService.updateConsentRequestId(response[0], response[1]);
+        }
+        try {
+            sseEmitter.send(SseEmitter.event().name("consent-request-on-init").data(response[2]));
+        }
+        catch (Exception e) {
+            System.out.println(e);
+            sseEmitter.complete();
+            map.remove(response[0]);
+        }
+    }
+
+    // STEP 3: ABDM -> user "Consent required"
+
+
+    // STEP 4: USER -> ABDM "Grant consent"
+
+    // STEP 5: ABDM -> v0.5/consents/hiu/notify
+
+    /*
+        {
+          "timestamp": "2023-04-15T10:07:28.46882752",
+          "requestId": "cf39fde8-2990-4c08-aa69-d396c884f64d",
+          "notification": {
+            "consentRequestId": "78f175b5-8dc0-4069-9678-00a668b0a95f",
+            "status": "GRANTED",
+            "consentArtefacts": [
+              {
+                "id": "ac4c2823-46d5-4ebd-8276-f90fe4bfc49a"
               }
-            }
-         */
+            ]
+          }
+        }
+     */
+    @PostMapping("/v0.5/consents/hiu/notify")
+    public void hiuConsentNotify(@RequestBody JSONObject requestBody) {
+        consentAndDataTransferService.updateConsentStatus(requestBody);
+    }
 
-        // STEP 3: ABDM -> user "Consent required"
+    @PostMapping("/v0.5/consents/hip/notify")
+    public void hipConsentNotify(@RequestBody JSONObject requestBody) {
 
-        // STEP 4: USER -> ABDM "Grant consent"
+    }
 
-        // STEP 5: ABDM -> v0.5/consents/hiu/notify
         /*
             {
               "timestamp": "2023-04-14T13:26:43.135066",
@@ -264,8 +304,10 @@ public class ConsentAndDataTransfer {
               }
             }
          */
+    // STEP 6: /v0.5/consents/hiu/on-notify -> ABDM
+    // This is to notify Hospital/Clinic/Doctor that consent is granted
+    // To be used only when consent is revoked or paused.
 
-        // STEP 6: /v0.5/consents/hiu/on-notify -> ABDM
         /*
             {
                 "requestId": "{{$guid}}",
@@ -282,7 +324,9 @@ public class ConsentAndDataTransfer {
             }
          */
 
-        // STEP 7: ABDM -> /v0.5/consents/hip/notify
+    // This is to notify backend system that consent is granted. Take these tokens and start fetching data.
+    // STEP 7: ABDM -> /v0.5/consents/hip/notify
+
         /*
             {
               "notification": {
@@ -345,8 +389,8 @@ public class ConsentAndDataTransfer {
             }
          */
 
+    // STEP 8 : /consents/fetch -> ABDM
 
-        // STEP 8 : /consents/fetch -> ABDM
         /*
             {
                 "requestId": "{{$guid}}",
@@ -354,8 +398,8 @@ public class ConsentAndDataTransfer {
                 "consentId": "2d17d862-af29-4b01-9cfc-375a16284aa0"
             }
          */
+    // STEP 9 : ABDM -> /consents/on-fetch
 
-        // STEP 9 : ABDM -> /consents/on-fetch
         /*
             {
               "requestId": "eb93068b-d785-4115-ab28-7c5dad55ae7c",
@@ -432,9 +476,4 @@ public class ConsentAndDataTransfer {
               }
             }
          */
-    @PostMapping("/v0.5/consents/hip/notify")
-    @CrossOrigin
-    public void consentNotify() {
-
-    }
 }

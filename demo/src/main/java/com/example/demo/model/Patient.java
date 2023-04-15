@@ -46,6 +46,9 @@ public class Patient {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "patient", cascade = CascadeType.ALL)
     private List<Visit> visits = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<ConsentRequest> consents = new ArrayList<>();
+
     public long getId() { return id; }
 
     public String getName() { return name; }
@@ -82,7 +85,11 @@ public class Patient {
     }
 
     public int getAge() {
-        String input = this.yearOfBirth + "-" + this.monthOfBirth + "-" + this.dateOfBirth;
+        String input;
+        if (monthOfBirth.length() == 1)
+            input = this.yearOfBirth + "-0" + this.monthOfBirth + "-" + this.dateOfBirth;
+        else
+            input = this.yearOfBirth + "-" + this.monthOfBirth + "-" + this.dateOfBirth;
         LocalDate dob = LocalDate.parse(input);
         return calculateAge(dob);
     }
@@ -116,6 +123,8 @@ public class Patient {
         obj.put("abha_number", abhaNumber);
         obj.put("age", getAge());
         obj.put("gender", gender);
+        obj.put("mobile", mobile);
+        obj.put("email", email);
         return obj.toString();
     }
 }

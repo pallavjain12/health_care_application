@@ -10,4 +10,11 @@ public class Enum {
     enum purpose {
 
     }
+
+    enum accessModes {
+        VIEW,
+        STORE,
+        QUERY,
+        STREAM
+    }
 }

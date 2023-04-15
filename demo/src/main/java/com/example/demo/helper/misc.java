@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.xml.crypto.Data;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -62,5 +63,16 @@ public class misc {
         System.out.println("misc care context reply -> " + response);
         System.out.flush();
         return "care context added successfull";
+    }
+
+    public void convertStringToDateTime(String str) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
+    }
+
+    public static void main(String[] args) {
+        String date = "1998-06-15T16:47:40.01010101";
+
+        System.out.println(ZonedDateTime.of(LocalDateTime.parse(date), ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
     }
 }

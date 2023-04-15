@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.json.JSONObject;
 
 @Entity
@@ -26,7 +27,11 @@ public class Employee {
     private String role;
 
     @Column(nullable = false)
-    private boolean isActive;
+    @ColumnDefault("true")
+    private boolean active;
+
+    @Column(unique = true)
+    private String registrationNumber;
 
     public boolean isValidPassword(String password) {
         return password.equals(this.password);
@@ -51,7 +56,7 @@ public class Employee {
 
     public void setRole(String role) { this.role = role; }
 
-    public void setActive(boolean active) { isActive = active; }
+    public void setActive(boolean active) { active = active; }
 
     public String toString() {
         JSONObject obj  = new JSONObject();
@@ -71,5 +76,13 @@ public class Employee {
         employee.put("role", getRole());
         employee.put("mobile", getMobile());
         return employee;
+    }
+
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
     }
 }

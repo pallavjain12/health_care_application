@@ -65,14 +65,12 @@ public class PatientServiceHelper {
         patient.setAbhaId(request.getString("id"));
         patient.setName(request.getString("name"));
         patient.setGender(request.getString("gender"));
-        patient.setYearOfBirth(request.getString("yearOfBirth"));
-        patient.setMonthOfBirth(request.getString("monthOfBirth"));
-        patient.setDateOfBirth(request.getString("dayOfBirth"));
+        patient.setYearOfBirth(request.get("yearOfBirth").toString());
+        patient.setMonthOfBirth(request.get("monthOfBirth").toString());
+        patient.setDateOfBirth(request.get("dayOfBirth").toString());
         patient.setRegistrationDateTime(LocalDate.now());
-        for (Object obj : request.keySet()) {
-            if (!request.isNull(obj.toString()) && obj.toString().equals("mobile")) patient.setMobile(obj.toString());
-            if (!request.isNull(obj.toString()) && obj.toString().equals("abhaNumber")) patient.setAbhaNumber(obj.toString());
-        }
+        patient.setMobile(request.getString("mobile"));
+        patient.setAbhaNumber(request.getString("abhaNumber"));
         return patient;
     }
 }

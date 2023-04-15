@@ -13,5 +13,7 @@ public class StringConstants {
     public static final String PASSWORD = "password";
     public static final String ABHAID = "abha_id";
     public static final String ABHANUMBER = "abha_number";
-
+    public static final String HIU_ID = "team-29-hiu-1";
+    public static final String REGNO = "REGNO";
+    public static final String REQUESTER_IDENTIFIER_SYSTEM = "https://www.mciindia.org";
 }
