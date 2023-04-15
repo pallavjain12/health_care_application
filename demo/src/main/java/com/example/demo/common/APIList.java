@@ -1,4 +1,4 @@
-package com.example.demo.abdm.api;
+package com.example.demo.common;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

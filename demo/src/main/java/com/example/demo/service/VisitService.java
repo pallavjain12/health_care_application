@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.abdm.api.APIList;
+import com.example.demo.common.APIList;
 import com.example.demo.constants.StringConstants;
 import com.example.demo.model.Patient;
 import com.example.demo.model.Visit;
@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.example.demo.abdm.Util.TokenUtil.getAccessToken;
+import static com.example.demo.utility.TokenUtil.getAccessToken;
 import static com.example.demo.helper.Service.VisitServiceHelper.prepareAddCareContextHeaders;
 import static com.example.demo.helper.Service.VisitServiceHelper.prepareAddContextRequest;
 

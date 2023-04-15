@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import com.example.demo.model.Consent;
 import com.example.demo.model.ConsentRequest;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -235,6 +236,7 @@ public class ConsentAndDataTransferController {
         return sseEmitter;
 
     }
+
     // STEP 2: ABDM -> /consent-request/on-init
     @PostMapping("/v0.5/consent-requests/on-init")
     @CrossOrigin
@@ -286,6 +288,7 @@ public class ConsentAndDataTransferController {
 
     @PostMapping("/v0.5/consents/hip/notify")
     public void hipConsentNotify(@RequestBody JSONObject requestBody) {
+        Consent consent = consentAndDataTransferService.createConsent(requestBody);
 
     }
 

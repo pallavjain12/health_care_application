@@ -17,4 +17,14 @@ public class Enum {
         QUERY,
         STREAM
     }
+
+    enum reports{
+        DiagnosticReport,
+        Prescription,
+        ImmunizationRecord,
+        DischargeSummary,
+        OPConsultation,
+        HealthDocumentRecord,
+        WellnessRecord
+    }
 }

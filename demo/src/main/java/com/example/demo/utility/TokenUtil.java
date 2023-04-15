@@ -1,6 +1,6 @@
-package com.example.demo.abdm.Util;
+package com.example.demo.utility;
 
-import com.example.demo.abdm.api.APIList;
+import com.example.demo.common.APIList;
 import org.json.JSONObject;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;

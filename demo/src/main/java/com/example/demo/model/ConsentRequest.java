@@ -1,9 +1,11 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import org.json.JSONArray;
 
 import java.time.LocalDate;
-
+import java.util.ArrayList;
+import java.util.List;
 @Entity
 public class ConsentRequest {
     @Id
@@ -15,8 +17,10 @@ public class ConsentRequest {
 
     @Column(nullable = false, unique = true)
     private String consentRequestId;
+
     @Column
     private String purpose;
+
     @Column(nullable = false)
     private LocalDate consentExpiryDateTime;
 
@@ -28,6 +32,7 @@ public class ConsentRequest {
 
     @Column
     private LocalDate dataExpiryDate;
+
     @Column
     private String status;
 
@@ -39,7 +44,12 @@ public class ConsentRequest {
     @JoinColumn(name = "patient_id", referencedColumnName = "id")
     private Patient patient;
 
+    @Column
     private String consentArtifactsId;
+
+    @Column
+    private String hiTypes;
+
     public long getId() { return id; }
 
     public void setId(long id) { this.id = id; }

@@ -1,17 +1,14 @@
 package com.example.demo.service;
 
 import com.example.demo.constants.StringConstants;
-import com.example.demo.model.ConsentRequest;
-import com.example.demo.model.Employee;
-import com.example.demo.model.Patient;
-import com.example.demo.repository.ConsentRequestRepository;
-import com.example.demo.repository.EmployeeRepository;
-import com.example.demo.repository.PatientRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static com.example.demo.helper.misc.getRandomUUID;
@@ -26,6 +23,12 @@ public class ConsentAndDataTransferService {
 
     @Autowired
     ConsentRequestRepository consentRequestRepository;
+
+    @Autowired
+    ConsentRepository consentRepository;
+
+    @Autowired
+    CareContextRepository careContextRepository;
     /*
          {
             "requestId": "{{$guid}}",
@@ -184,24 +187,95 @@ public class ConsentAndDataTransferService {
         ConsentRequest consentRequest = consentRequestRepository.findConsentRequestByConsentRequestId(consentRequestId);
         consentRequest.setStatus(status);
         if (status.equals("GRANTED")) {
-            consentRequest.setConsentArtifactsId(obj.getJSONObject("notification").getJSONObject("consentArtefacts").getString("id"));
-            consentRequestRepository.save(consentRequest);
+            consentRequest.setConsentArtifactsId(obj.getJSONObject("notification").getJSONObject("consentArtefacts").toString());
         }
+        consentRequestRepository.save(consentRequest);
     }
 
     /*
     {
-        "requestId": "{{$guid}}",
-        "timestamp": "{{$isoTimestamp}}",
-        "acknowledgement": [
-            {
-                "status": "OK",
-                "consentId": "ac4c2823-46d5-4ebd-8276-f90fe4bfc49a"
-            }
-        ],
-        "resp": {
-            "requestId": "cf39fde8-2990-4c08-aa69-d396c884f64d"
-        }
+        "notification": {
+            "consentDetail": {
+                "consentId": "15675f69-a202-49e4-b93c-c547da127080",
+                "createdAt": "2023-04-14T09:31:15.84929155",
+                "purpose": {
+                    "text": "Self Requested",
+                    "code": "PATRQT",
+                    "refUri": null
+                },
+                "patient": {
+                    "id": "pallavjain@sbx"
+                    },
+                "consentManager": {
+                    "id": "sbx"
+                },
+                "hip": {
+                    "id": "team-29-hip-1",
+                    "name": null
+                },
+                "hiTypes": [
+                    "DiagnosticReport",
+                    "Prescription",
+                    "ImmunizationRecord",
+                    "DischargeSummary",
+                    "OPConsultation",
+                    "HealthDocumentRecord",
+                    "WellnessRecord"
+                ],
+                "permission": {
+                    "accessMode": "VIEW",
+                    "dateRange": {
+                        "from": "2016-04-14T09:31:15.813225045",
+                        "to": "2023-04-14T09:31:15.813239214"
+                    },
+                    "dataEraseAt": "2023-06-14T09:31:15.667",
+                    "frequency": {
+                        "unit": "HOUR",
+                        "value": 1,
+                        "repeats": 0
+                    }
+                },
+                "careContexts": [
+                    {
+                        "patientReference": "PUID-00001",
+                        "careContextReference": "visit-af63a734-9779-4d6b-9185-818ee54032fa"
+                    }
+                ]
+            },
+            "status": "GRANTED",
+            "signature": "hvf5tJndzjCMVDfITCZE1MAk8NU59Gh9bSQIuBhPnVx0KKwVZ7f86fc5gA3ZjUohfHuQEzkwks/OIVERHH04JvwrR4PGFLuT4kXrqA2QFzXagVK9QfclJC+6Gh0t9001Atj7j1xJbKBEpOfrDXJAZyubSgx9M7OYx1/BEUs3MST48AwTtEltrdLJTjTY/k/nZfmUUhu71/V18H8PzakzyWn25II8N+igk0bhLaFKp7BEkKjEDywCpupZ32dJB9BN4DScgvHs4kmRQGRLTbFVYKvTdv3UUMKEuAIC76fPWhlpV3VPO60utoPLAllfTpRgLMnZuKANsnOwVAVC3pkfmA==",
+            "consentId": "15675f69-a202-49e4-b93c-c547da127080",
+            "grantAcknowledgement": false
+        },
+        "requestId": "921dc90c-de8c-4bcd-928a-8816528e7798",
+        "timestamp": "2023-04-14T09:31:15.883786689"
     }
      */
+
+    public Consent createConsent(JSONObject obj) {
+        obj = obj.getJSONObject("notification");
+        Consent consent = new Consent();
+        consent.setStatus(obj.getString("status"));
+        consent.setSignature(obj.getString("signature"));
+        consent.setConsentId(obj.getString("consentId"));
+
+        obj = obj.getJSONObject("consentDetail");
+
+        consent.setPurpose(obj.getJSONObject("purpose").getString("text"));
+        consent.setPurposeCode(obj.getJSONObject("purpose").getString("code"));
+        consent.setPatient(patientRepository.findPatientByAbhaId(obj.getJSONObject("patient").getString("id")));
+        consent.setHiTypes(obj.getJSONArray("hiTypes").toString());
+//        TODO: check date and time
+        consent.setHealthInfoFromDate(LocalDateTime.parse(obj.getJSONObject("permission").getJSONObject("dateRange").getString("from")));
+        consent.setHealthInfoUpToDate(LocalDateTime.parse(obj.getJSONObject("permission").getJSONObject("dateRange").getString("to")));
+        consent.setDataExpiryDate(LocalDateTime.parse(obj.getJSONObject("permission").getString("dataEraseAt")));
+
+        for (Object o : obj.getJSONArray("careContexts")) {
+            JSONObject temp = (JSONObject) o;
+            CareContext careContext = new CareContext(temp.getString("patientReference"), temp.getString("careContextReference"));
+            careContextRepository.save(careContext);
+            consent.addCareContext(careContext);
+        }
+        return consentRepository.save(consent);
+    }
 }

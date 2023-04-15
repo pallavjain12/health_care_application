@@ -1,11 +1,10 @@
 package com.example.demo.service;
 
-import com.example.demo.abdm.Util.TokenUtil;
-import com.example.demo.abdm.api.APIList;
+import com.example.demo.utility.TokenUtil;
+import com.example.demo.common.APIList;
 import com.example.demo.constants.StringConstants;
 import com.example.demo.helper.Service.PatientServiceHelper;
 import com.example.demo.model.Patient;
-import com.example.demo.model.Visit;
 import com.example.demo.repository.PatientRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
