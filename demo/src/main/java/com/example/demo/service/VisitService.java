@@ -27,7 +27,7 @@ public class VisitService {
     VisitRepository visitRepository;
     public Visit createNewVisit(Patient patient) {
         List<Visit> list = visitRepository.findVisitByPatient_Id(patient.getId());
-        Visit visit = new Visit(LocalDate.now(), "Visit Number - " + list.size() + 1, "Consultation on : " + LocalDate.now());
+        Visit visit = new Visit(LocalDate.now(), "Visit-" + patient.getId() + "-" + (list.size() + 1), "Consultation on : " + LocalDate.now());
         visit.setPatient(patient);
         visitRepository.save(visit);
         return visit;

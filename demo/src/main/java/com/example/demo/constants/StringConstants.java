@@ -16,4 +16,7 @@ public class StringConstants {
     public static final String HIU_ID = "team-29-hiu-1";
     public static final String REGNO = "REGNO";
     public static final String REQUESTER_IDENTIFIER_SYSTEM = "https://www.mciindia.org";
+    public static final String DATA_PUSH_URL = "/data/push";
+    public static final String CRYPTO_ALGO = "ECDH";
+    public static final String CURVE = "Curve25519";
 }

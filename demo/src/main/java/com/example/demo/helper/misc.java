@@ -70,9 +70,12 @@ public class misc {
         LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
     }
 
-    public static void main(String[] args) {
-        String date = "1998-06-15T16:47:40.01010101";
+    public static String convertDateTOZonedUTC(String date) {
+        return ZonedDateTime.of(LocalDateTime.parse(date + "T00:00:00.00000001"), ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+    }
 
+    public static void main(String[] args) {
+        String date = "1998-06-15T00:00:00.00000001";
         System.out.println(ZonedDateTime.of(LocalDateTime.parse(date), ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
     }
 }

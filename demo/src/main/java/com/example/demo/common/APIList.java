@@ -13,6 +13,9 @@ public class APIList {
     public static final String ADD_CARE_CONTEXT = "https://dev.abdm.gov.in/gateway/v0.5/links/link/add-contexts";
     public static final String AUTH_CONFIRM = "https://dev.abdm.gov.in/gateway/v0.5/users/auth/confirm";
     public static final String AUTH_INIT = "https://dev.abdm.gov.in/gateway/v0.5/users/auth/init";
+    public static final String CARE_CONTEXT_INIT = "https://dev.abdm.gov.in/gateway/v0.5/consent-requests/init";
+    public static final String CARE_CONTEXT_FETCH = "https://dev.abdm.gov.in/gateway/v0.5/consents/fetch";
+    public static final String HEALTH_DATA_REQUEST = "https://dev.abdm.gov.in/gateway/v0.5/health-information/cm/request";
 
     public static void main(String[] args) {
         JSONObject o = new JSONObject("{\n" +
