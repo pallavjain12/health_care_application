@@ -1,10 +1,16 @@
 package com.example.demo.helper.Service;
 
 import com.example.demo.constants.StringConstants;
+import com.example.demo.helper.DataEncrypterDecrypter;
+import com.example.demo.model.CareContext;
 import com.example.demo.model.Consent;
 import com.example.demo.model.ConsentRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
 
 import static com.example.demo.helper.misc.getRandomUUID;
 import static com.example.demo.helper.misc.getTimeStamp;
@@ -87,14 +93,71 @@ public class ConsentRequestServiceHelper {
         response.getJSONObject("hiRequest").getJSONObject("keyMaterial").put("cryptoAlg", StringConstants.CRYPTO_ALGO);
 
         response.getJSONObject("hiRequest").getJSONObject("keyMaterial").put("dhPublicKey", new JSONObject());
-        // TODO
-        //  - paramenetes
-        //  - expiry
-        //  - nonce
-        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("expiry", "");
-        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("parameters", "");
-        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("keyValue", "");
-        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").put("nonce", "");
+        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("expiry", "2023-06-05T01:02:03.0009Z");
+        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("parameters", "Ephemeral public key");
+        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("keyValue", consent.getReceiverPublicKey());
+        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").put("nonce", consent.getReceiverNonce());
         return response;
+    }
+
+    public static CareContext findCareContext(List<CareContext> list, String careContextName) {
+        for (int i = 0; i < list.size(); i++) {
+            CareContext cc = list.get(i);
+            if (cc.getCareContextReference().equals(careContextName))   return cc;
+            else return null;
+        }
+        return null;
+    }
+
+    public static HashMap<String, String> updateCareContextData(String senderNonce, String senderPublicKey, String receiverNonce, String receiverPrivateKey, String encryptedData) {
+        try {
+            String decryptedData = DataEncrypterDecrypter.decrypt(encryptedData, senderPublicKey, senderNonce, receiverPrivateKey, receiverNonce);
+            return readFHIRDataAndUpdateCareContext(decryptedData);
+        }
+        catch (Exception e) {
+            System.out.println("Error while decrypting " + e);
+            return null;
+        }
+    }
+
+    public static HashMap<String, String> readFHIRDataAndUpdateCareContext(String decryptedData) {
+        JSONObject obj = new JSONObject(decryptedData);
+        JSONArray arr =  obj.getJSONArray("entry");
+        String doctorId = "", patientName = "", doctorName = "", dosageInstructions = "", patientId = "", diagnosis = "", medicineName = "";
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject temp = arr.getJSONObject(i);
+            String[] splitArr = temp.getString("fullUrl").split("/");
+            String identifier = splitArr[0];
+            if (identifier.equalsIgnoreCase("Practitioner")) {
+                temp = temp.getJSONObject("resource");
+                doctorId =  temp.getString("id");
+                doctorName = temp.getJSONArray("name").getJSONObject(0).getString("text");
+            }
+            else if (identifier.equalsIgnoreCase("Patient")) {
+                patientId = temp.getJSONObject("resource").getString("id");
+                patientName = temp.getJSONObject("resource").getJSONArray("name").getJSONObject(0).getString("text");
+            }
+            else if (identifier.equalsIgnoreCase("Condition")) {
+                diagnosis = temp.getJSONObject("resource").getJSONObject("code").getString("text");
+            }
+            else if(identifier.equalsIgnoreCase("Medication")) {
+                medicineName = temp.getJSONObject("resource").getJSONObject("code").getString("text");
+            }
+            else if (identifier.equalsIgnoreCase("MedicationRequest")) {
+                dosageInstructions = temp.getJSONObject("resource").getJSONArray("dosageInstruction").getJSONObject(0).getString("text");
+            }
+            else {
+                System.out.println("Found extra data -> " + temp.toString());
+            }
+        }
+        HashMap<String, String> map = new HashMap<>();
+        map.put("doctorId", doctorId);
+        map.put("doctorName", doctorName);
+        map.put("dosageInstruction", dosageInstructions);
+        map.put("medicineName", medicineName);
+        map.put("diagnosis", diagnosis);
+        map.put("patientName", patientName);
+        map.put("patientId", patientId);
+        return map;
     }
 }

@@ -25,9 +25,11 @@ public class Consent {
     @Column
     private String transactionId;
     @Column
-    private String publicKey;
+    private String receiverPublicKey;
     @Column
-    private String privateKey;
+    private String receiverPrivateKey;
+    @Column
+    private String receiverNonce;
     @Column
     private String requestId;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -42,6 +44,8 @@ public class Consent {
 
     @Column
     private String dataEraseAt;
+    @Column
+    private String patientReferenceWhenSendingData;
 
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
@@ -76,22 +80,6 @@ public class Consent {
         this.transactionId = transactionId;
     }
 
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public String getPrivateKey() {
-        return privateKey;
-    }
-
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-    }
-
     public String getRequestId() {
         return requestId;
     }
@@ -122,5 +110,37 @@ public class Consent {
 
     public void setDataEraseAt(String dataEraseAt) {
         this.dataEraseAt = dataEraseAt;
+    }
+
+    public String getReceiverPublicKey() {
+        return receiverPublicKey;
+    }
+
+    public void setReceiverPublicKey(String receiverPublicKey) {
+        this.receiverPublicKey = receiverPublicKey;
+    }
+
+    public String getReceiverPrivateKey() {
+        return receiverPrivateKey;
+    }
+
+    public void setReceiverPrivateKey(String receiverPrivateKey) {
+        this.receiverPrivateKey = receiverPrivateKey;
+    }
+
+    public String getReceiverNonce() {
+        return receiverNonce;
+    }
+
+    public void setReceiverNonce(String receiverNonce) {
+        this.receiverNonce = receiverNonce;
+    }
+
+    public String getPatientReferenceWhenSendingData() {
+        return patientReferenceWhenSendingData;
+    }
+
+    public void setPatientReferenceWhenSendingData(String patientReferenceWhenSendingData) {
+        this.patientReferenceWhenSendingData = patientReferenceWhenSendingData;
     }
 }

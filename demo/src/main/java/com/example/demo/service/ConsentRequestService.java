@@ -14,6 +14,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import static com.example.demo.common.ResponseHelper.prepareHeader;
 import static com.example.demo.helper.Service.ConsentRequestServiceHelper.*;
 import static com.example.demo.helper.misc.*;
@@ -101,7 +105,7 @@ public class ConsentRequestService {
         consentRequestRepository.save(consentRequest);
     }
 
-    public void updateConsentRequestStatus(JSONObject obj) {
+    public boolean updateConsentRequestStatus(JSONObject obj) {
         String consentRequestId = obj.getJSONObject("notification").getString("consentRequestId");
         String status = obj.getJSONObject("notification").getString("status");
         ConsentRequest consentRequest = consentRequestRepository.findConsentRequestByConsentRequestId(consentRequestId);
@@ -117,6 +121,7 @@ public class ConsentRequestService {
             }
         }
         consentRequestRepository.save(consentRequest);
+        return status.equals("GRANTED");
     }
 
     public String fireArtifactsFetchRequest(JSONArray arr) {
@@ -177,40 +182,31 @@ public class ConsentRequestService {
         consent.setTransactionId(requestBody.getJSONObject("hiRequest").getString("transactionId"));
         consentRepository.save(consent);
     }
-
-    /*
-    {
-		"pageNumber": 0,
-		"pageCount": 0,
-		"transactionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-		"entries": [
-			{
-				"content": "Encrypted content of data packaged in FHIR bundle",
-				"media": "application/fhir+json",
-				"checksum": "string",
-				"careContextReference": "RVH1008"
-			},
-			{
-				"link": "https://data-from.net/sa2321afaf12e13",
-				"media": "application/fhir+json",
-				"checksum": "string",
-				"careContextReference": "NCC1701"
-			}
-		],
-		"keyMaterial": {
-		"cryptoAlg": "ECDH",
-		"curve": "Curve25519",
-		"dhPublicKey": {
-			"expiry": "2023-04-15T18:45:55.754Z",
-			"parameters": "Curve25519/32byte random key",
-			"keyValue": "string"
-		},
-		"nonce": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-		}
-	}
-     */
     public void saveData(JSONObject data) {
         Consent consent = consentRepository.findConsentByTransactionId(data.getString("transactionId"));
-        // TODO
+        String senderPublicKey = data.getJSONObject("dhPublicKey").getString("keyValue");
+        String senderNonce = data.getString("nonce");
+        String receiverNonce = consent.getReceiverNonce();
+        String receiverPrivateKey = consent.getReceiverPrivateKey();
+        JSONArray arr = data.getJSONArray("entries");
+        List<CareContext> careContexts = consent.getCareContextList();
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject obj = arr.getJSONObject(i);
+            String careContextReference = obj.getString("careContextReference");
+
+            //     Instead of searching care context don't save care context before instead start storing care context which you received
+            //     Cannot do this because when consent is granted we have to check again updated consent parameters.
+            String encryptedData = obj.getString("content");
+            CareContext tempCareContext = findCareContext(careContexts, careContextReference);
+            HashMap<String, String> decodedMsg = updateCareContextData(senderNonce, senderPublicKey, receiverNonce, receiverPrivateKey, encryptedData);
+            tempCareContext.setDoctorId(decodedMsg.getOrDefault("doctorId", "temp-doctor-id"));
+            tempCareContext.setPatientId(decodedMsg.getOrDefault("patientId", "temp-patient-id"));
+            tempCareContext.setPatientName(decodedMsg.getOrDefault("patientName", "temp-patient-name"));
+            tempCareContext.setDoctorName(decodedMsg.getOrDefault("doctorName", "temp-doctor-name"));
+            tempCareContext.setDosageInstruction(decodedMsg.getOrDefault("dosageInstruction", "1 time a day"));
+            tempCareContext.setPrescription(decodedMsg.getOrDefault("medicineName", "Paracetamol 650 mg"));
+            tempCareContext.setDiagnosis(decodedMsg.getOrDefault("diagnosis", "Fever"));
+            careContextRepository.save(tempCareContext);
+        }
     }
 }

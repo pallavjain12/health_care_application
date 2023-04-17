@@ -41,65 +41,99 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.springframework.http.codec.ServerSentEvent;
 
 import javax.crypto.KeyAgreement;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+import java.util.HashMap;
 
-public class DataEncrypter {
+public class DataEncrypterDecrypter {
     public static final String ALGORITHM = "ECDH";
     public static final String CURVE = "curve25519";
     public static final String PROVIDER = BouncyCastleProvider.PROVIDER_NAME;
-    public static final String strToPerformActionOn = "SomeValue";
 
-    // Driver function
     public static void main(String[] args) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
-
-        System.out.println("Details");
-        System.out.println("ALGORITHM: " + ALGORITHM);
-        System.out.println("CURVE: " + CURVE);
-        System.out.println("DATA: " + strToPerformActionOn);
-        System.out.println("<---------------- BEGIN ------------------->");
-        System.out.println("\n");
+//
+//        // Generate the DH keys for sender and receiver
+//        KeyPair receiverKeyPair = generateKeyPair();
+//        String receiverPrivateKey = getBase64String(getEncodedPrivateKey(receiverKeyPair.getPrivate()));
+//        String receiverPublicKey = getBase64String(getEncodedPublicKeyFor(receiverKeyPair.getPublic()));
+//
+//        KeyPair senderKeyPair = generateKeyPair();
+//        String senderPrivateKey = getBase64String(getEncodedPrivateKey(senderKeyPair.getPrivate()));
+//        String senderPublicKey = getBase64String(getEncodedPublicKeyFor(senderKeyPair.getPublic()));
+//
+//        String randomSender = generateRandomKey();
+//        String randomReceiver = generateRandomKey();
+//        System.out.println("sender Private key: " + senderPrivateKey);
+//        System.out.println("sender public key: " + senderPublicKey);
+//        System.out.println("sender nonce: " + randomSender);
+//        System.out.println("receiver private key: "+ receiverPrivateKey);
+//        System.out.println("receiver public key: " + receiverPublicKey);
+//        System.out.println("receiver nonce: " + randomReceiver);
+//
+//        byte[] xorOfRandom = xorOfRandom(randomSender, randomReceiver);
+//        String encryptedData = encrypt(xorOfRandom, senderPrivateKey, receiverPublicKey, strToPerformActionOn);
+//
+//        String decryptedData = decrypt(xorOfRandom, receiverPrivateKey, senderPublicKey, encryptedData);
+//        System.out.println("decryptedData: "+decryptedData);
+    }
+    public static HashMap<String, String> receiverKeys() {
+        Security.addProvider(new BouncyCastleProvider());
+        KeyPair pair;
+        String privateKey = "";
+        String publicKey = "";
+        String random = "";
 
         // Generate the DH keys for sender and receiver
-        KeyPair receiverKeyPair = generateKeyPair();
-        String receiverPrivateKey = getBase64String(getEncodedPrivateKey(receiverKeyPair.getPrivate()));
-        String receiverPublicKey = getBase64String(getEncodedPublicKey(receiverKeyPair.getPublic()));
+        try {
+            KeyPair receiverKeyPair = generateKeyPair();
+            privateKey = getBase64String(getEncodedPrivateKey(receiverKeyPair.getPrivate()));
+            publicKey = getBase64String(getEncodedPublicKeyFor(receiverKeyPair.getPublic()));
+            random = generateRandomKey();
+        }
+        catch (Exception e) {
+            System.out.println("Unable to generate Keys : " + e);
+            return null;
+        }
 
-        KeyPair senderKeyPair = generateKeyPair();
-        String senderPrivateKey = getBase64String(getEncodedPrivateKey(senderKeyPair.getPrivate()));
-        String senderPublicKey = getBase64String(getEncodedPublicKey(senderKeyPair.getPublic()));
-
-        // Generate random key for sender and receiver
-        String randomSender = generateRandomKey();
-        String randomReceiver = generateRandomKey();
-
-        // Generating Xor of random Keys
-        byte[] xorOfRandom = xorOfRandom(randomSender, randomReceiver);
-
-        String encryptedData = encrypt(xorOfRandom, senderPrivateKey, receiverPublicKey, strToPerformActionOn);
-
-        System.out.println("\n");
-
-        String decryptedData = decrypt(xorOfRandom, receiverPrivateKey, senderPublicKey, encryptedData);
-
-        System.out.println("\n");
-        System.out.println("Data to encrypt: " + strToPerformActionOn + " , encrypted Data: " + encryptedData + " , decrypted data: " + decryptedData);
-        System.out.println("\n");
-        System.out.println("<---------------- DONE ------------------->");
+        HashMap<String, String> map = new HashMap<>();
+        map.put("privateKey", privateKey);
+        map.put("publicKey", publicKey);
+        map.put("random", random);
+        return map;
+    }
+    public static String encryptFHIRData(String receiverPublicKey, String randomReceiver, String data, String senderPrivateKey, String randomSender) {
+        try {
+            Security.addProvider(new BouncyCastleProvider());
+            byte[] xorOfRandom = xorOfRandom(randomSender, randomReceiver);
+            return encrypt(xorOfRandom, senderPrivateKey, receiverPublicKey, data);
+        }
+        catch (Exception e) {
+            System.out.println("unable to encrypt data : " + e);
+            return null;
+        }
+    }
+    public static String decrypt(String encryptedData, String senderPublicKey, String randomSender, String receiverPrivateKey, String randomReceiver) {
+        try {
+            Security.addProvider(new BouncyCastleProvider());
+            byte[] xorOfRandom = xorOfRandom(randomSender, randomReceiver);
+            String decryptedData = decrypt(xorOfRandom, receiverPrivateKey, senderPublicKey, encryptedData);
+            return decryptedData;
+        }
+        catch (Exception e) {
+            System.out.println("Unable to decrypt data : " + e);
+            return null;
+        }
 
     }
 
@@ -223,7 +257,7 @@ public class DataEncrypter {
     private static String doECDH (byte[] dataPrv, byte[] dataPub) throws Exception {
         KeyAgreement ka = KeyAgreement.getInstance(ALGORITHM, PROVIDER);
         ka.init(loadPrivateKey(dataPrv));
-        ka.doPhase(loadPublicKey(dataPub), true);
+        ka.doPhase(loadPublicKeyForProjectEKAHIU(dataPub), true);
         byte [] secret = ka.generateSecret();
         return getBase64String(secret);
     }

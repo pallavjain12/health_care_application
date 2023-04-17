@@ -43,7 +43,7 @@ public class VisitController {
         return emitter;
     }
 
-    @PostMapping("/v0.5/consents/hip/notify")
+    @PostMapping("/v0.5/links/link/on-add-contexts")
     @CrossOrigin
     public void onAddNewVisit(@RequestBody String response) {
         String[] respond = visitService.createOnAddContextResponse(response);

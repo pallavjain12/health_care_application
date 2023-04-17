@@ -12,6 +12,7 @@ import com.example.demo.service.ConsentRequestService;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class ConsentRequestController {
     ConsentRequestService consentRequestService;
@@ -59,8 +60,8 @@ public class ConsentRequestController {
     @PostMapping("/v0.5/consents/hiu/notify")
     @CrossOrigin
     public void hiuConsentNotify(@RequestBody JSONObject requestBody) {
-        consentRequestService.updateConsentRequestStatus(requestBody);
-        consentRequestService.fireArtifactsFetchRequest(requestBody.getJSONObject("notification").getJSONArray("consentArtefacts"));
+        boolean consentGranted = consentRequestService.updateConsentRequestStatus(requestBody);
+        if (consentGranted) consentRequestService.fireArtifactsFetchRequest(requestBody.getJSONObject("notification").getJSONArray("consentArtefacts"));
     }
 
     @PostMapping("/v0.5/consents/on-fetch")
@@ -77,6 +78,7 @@ public class ConsentRequestController {
 
     @PostMapping("/data/push")
     public void dataPush(@RequestBody JSONObject data) {
+        System.out.println(data.toString());
         consentRequestService.saveData(data);
     }
 

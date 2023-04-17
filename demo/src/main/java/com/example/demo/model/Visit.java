@@ -11,12 +11,15 @@ public class Visit {
     private long id;
     @Column
     private String prescription;
-
+    @Column
+    private String dosageInstruction;
+    @Column
+    private String diagnosis;
     @Column
     private LocalDate visitDate;
-
+    @Column
     private String referenceNumber;
-
+    @Column
     private String display;
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "patient_id", referencedColumnName = "id")
@@ -56,4 +59,24 @@ public class Visit {
     public String getRequestId() { return requestId; }
 
     public void setRequestId(String requestId) { this.requestId = requestId; }
+
+    public void setPrescription(String prescription) {
+        this.prescription = prescription;
+    }
+
+    public String getDosageInstruction() {
+        return dosageInstruction;
+    }
+
+    public void setDosageInstruction(String dosageInstruction) {
+        this.dosageInstruction = dosageInstruction;
+    }
+
+    public String getDiagnosis() {
+        return diagnosis;
+    }
+
+    public void setDiagnosis(String diagnosis) {
+        this.diagnosis = diagnosis;
+    }
 }

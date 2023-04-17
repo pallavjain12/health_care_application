@@ -7,6 +7,8 @@ import javax.print.attribute.standard.JobKOctets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static com.example.demo.helper.misc.getRandomUUID;
+
 public class APIList {
     public static final String FETCH_AUTH_TOKEN = "https://dev.abdm.gov.in/gateway/v0.5/sessions";
     public static final String REGISTER_HRP_HOST = "https://dev.abdm.gov.in/devservice/v1/bridges";
@@ -16,43 +18,20 @@ public class APIList {
     public static final String CARE_CONTEXT_INIT = "https://dev.abdm.gov.in/gateway/v0.5/consent-requests/init";
     public static final String CARE_CONTEXT_FETCH = "https://dev.abdm.gov.in/gateway/v0.5/consents/fetch";
     public static final String HEALTH_DATA_REQUEST = "https://dev.abdm.gov.in/gateway/v0.5/health-information/cm/request";
+    public static final String HIP_REQUEST_ON_NOTIFY = "/v0.5/consents/hip/on-notify";
+    public static final String HIP_REQUEST_ON_REQUEST = "/v0.5/health-information/hip/on-request";
+    public static final String HIP_ON_DATA_TRANSFER_COMPLETE_NOTIFY = "/v0.5/health-information/notify";
 
     public static void main(String[] args) {
-        JSONObject o = new JSONObject("{\n" +
-                "  \"requestId\": \"18305fa9-03e0-45a6-ac0d-f870e0e3b116\",\n" +
-                "  \"timestamp\": \"2023-03-26T05:52:20.054624235\",\n" +
-                "  \"auth\": {\n" +
-                "    \"accessToken\": \"eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiJwYWxsYXZqYWluQHNieCIsInJlcXVlc3RlclR5cGUiOiJISVAiLCJyZXF1ZXN0ZXJJZCI6InRlYW0tMjktaGlwLTEiLCJwYXRpZW50SWQiOiJwYWxsYXZqYWluQHNieCIsInNlc3Npb25JZCI6IjVhZjFiMjg4LThlMjUtNDk1OS1hNmY1LTBmMzMxMzc5NDlhMiIsImV4cCI6MTY3OTg5NjMzOSwiaWF0IjoxNjc5ODA5OTM5fQ.MhKXcVGwNGNqRl8N3ehU1gIptf4jgBHpy-0L3LCDRx0LADJgADVeCghn5lp6Kyw02b1bUBodpNGGOzgg6Muws1UFVwdNMZqCPJ6NN3APjahraQMu8dNRFvVC-nvY4vKETczefKi-RHnmLPZkb7w9UeTen5s2-1rs5vjnm7IxRAlpzntV1j-mhQd-LtL3xG1JvhXVySbAh9HWVKKgfe0GDS5mIO8RorO1wah_DZg4pO7YVPtNSW5U8TKWCXMQfzx2eG6fKKCfPZiTkBIS5NxH1wJcLCIQigXyS6hH67hGvNSsow5yct7IC6jjG2ukIBNSfxtPj2VOiKt4uZfjugVpmg\",\n" +
-                "    \"patient\": {\n" +
-                "      \"id\": \"pallavjain@sbx\",\n" +
-                "      \"name\": \"Pallav Jain\",\n" +
-                "      \"gender\": \"M\",\n" +
-                "      \"yearOfBirth\": 1998,\n" +
-                "      \"monthOfBirth\": 6,\n" +
-                "      \"dayOfBirth\": 15,\n" +
-                "      \"address\": {\n" +
-                "        \"line\": null,\n" +
-                "        \"district\": \"DATIA\",\n" +
-                "        \"state\": \"MADHYA PRADESH\",\n" +
-                "        \"pincode\": null\n" +
-                "      },\n" +
-                "      \"identifiers\": [\n" +
-                "        {\n" +
-                "          \"type\": \"MOBILE\",\n" +
-                "          \"value\": \"8109629687\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "          \"type\": \"HEALTH_NUMBER\",\n" +
-                "          \"value\": null\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"error\": null,\n" +
-                "  \"resp\": {\n" +
-                "    \"requestId\": \"7a160772-9793-404d-b013-b28be537cd5c\"\n" +
-                "  }\n" +
-                "}");
+        String doctorName = "Abdul bari";
+        String dosageInstructions = "2 times a day";
+        String doctorId = "34";
+        String diagnosis = "AIDS";
+        String patientId = "1";
+        String patientName = "KRK";
+        String medicineName = "Vodka 200ml neat";
+
+        JSONObject o = new JSONObject("{\"resourceType\":\"Bundle\",\"id\":\""+getRandomUUID()+"\",\"meta\":{\"lastUpdated\":\"2018-08-01T00:00:00.000+05:30\"},\"identifier\":{\"system\":\"https://www.max.in/bundle\",\"value\":\""+getRandomUUID()+"\"},\"type\":\"document\",\"timestamp\":\"2018-08-01T00:00:00.000+05:30\",\"entry\":[{\"fullUrl\":\"Composition/"+getRandomUUID()+"\",\"resource\":{\"resourceType\":\"Composition\",\"id\":\""+getRandomUUID()+"\",\"identifier\":{\"system\":\"https://www.max.in/document\",\"value\":\""+getRandomUUID()+"\"},\"status\":\"final\",\"type\":{\"coding\":[{\"system\":\"https://projecteka.in/sct\",\"code\":\"440545006\",\"display\":\"Prescription record\"}]},\"subject\":{\"reference\":\"Patient/" + patientId +"\"},\"date\":\"2018-08-01T00:00:00.605+05:30\",\"author\":[{\"reference\":\"Practitioner/"+ doctorId + "\",\"display\":\"" + doctorName + "\"}],\"title\":\"Prescription\",\"section\":[{\"title\":\"OPD Prescription\",\"code\":{\"coding\":[{\"system\":\"https://projecteka.in/sct\",\"code\":\"440545006\",\"display\":\"Prescription record\"}]},\"entry\":[{\"reference\":\"MedicationRequest/"+getRandomUUID()+"\"}]}]}},{\"fullUrl\":\"Practitioner/"+doctorId+"\",\"resource\":{\"resourceType\":\"Practitioner\",\"id\":\""+doctorId+"\",\"identifier\":[{\"system\":\"https://www.mciindia.in/doctor\",\"value\":\""+doctorId+"\"}],\"name\":[{\"text\":\""+doctorName+"\",\"prefix\":[\"Dr\"],\"suffix\":[\"\"]}]}},{\"fullurl\":\"Patient/"+patientId+"\",\"resource\":{\"resourceType\":\"Patient\",\"id\":\""+patientId+"\",\"name\":[{\"text\":\""+patientName+"\"}],\"gender\":\"male\"}},{\"fullUrl\":\"Condition/"+getRandomUUID()+"\",\"resource\":{\"resourceType\":\"Condition\",\"id\":\""+getRandomUUID()+"\",\"code\":{\"text\":\""+diagnosis+"\"},\"subject\":{\"reference\":\"Patient/"+patientId+"\"}}},{\"fullUrl\":\"Medication/"+getRandomUUID()+"\",\"resource\":{\"resourceType\":\"Medication\",\"id\":\""+getRandomUUID()+"\",\"code\":{\"text\":\""+medicineName+"\"}}},{\"fullUrl\":\"MedicationRequest/"+getRandomUUID()+"\",\"resource\":{\"resourceType\":\"MedicationRequest\",\"id\":\""+getRandomUUID()+"\",\"status\":\"active\",\"intent\":\"order\",\"medicationReference\":{\"reference\":\"Medication/"+getRandomUUID()+"\"},\"subject\":{\"reference\":\"Patient/"+patientId+"\"},\"authoredOn\":\"2018-08-01T00:00:00+05:30\",\"requester\":{\"reference\":\"Practitioner/"+doctorId+"\"},\"reasonReference\":[{\"reference\":\"Condition/"+getRandomUUID() +"\"}],\"dosageInstruction\":[{\"text\":\""+dosageInstructions+"\"}]}}]}");
 
 //        JSONObject t = o.getJSONObject("auth");
 //        JSONObject p = t.getJSONObject("patient");
@@ -64,6 +43,6 @@ public class APIList {
 //                if ( !temp.isNull(e.toString())) System.out.println(temp.getString(e.toString()));
 //            }
 //        }
-        System.out.println(LocalDate.now());
+        System.out.println(o.toString());
     }
 }
