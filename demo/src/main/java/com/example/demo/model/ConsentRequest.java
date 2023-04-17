@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Entity
@@ -115,5 +116,22 @@ public class ConsentRequest {
 
     public void setRequestId(String requestId) {
         this.requestId = requestId;
+    }
+
+    public String toString() {
+        return "\nid: " + id+
+                "\npurpose: " +purpose +
+                "\npurposeCode: " +purposeCode +
+                "\npatient: " + patient+
+                "\ndoctor: " +doctor +
+                "\nhiTypes: " + hiTypes+
+                "\naccessMode: " + accessMode+
+                "\ndataEraseAt: " + dataEraseAt+
+                "\ndateFrom: " + dateFrom+
+                "\ndateTo: " + dateTo+
+                "\nconsentRequestId: " +consentRequestId +
+                "\nStatus: " + status +
+                "\nconsentList: " + Arrays.toString(consentList.toArray()) +
+                "\nrequestId: " + requestId;
     }
 }

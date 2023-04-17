@@ -12,6 +12,8 @@ import com.example.demo.repository.PatientRepository;
 import com.example.demo.repository.VisitRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +34,7 @@ import static com.example.demo.utility.TokenUtil.getAccessToken;
 
 @Service
 public class DataTransferService {
+    Logger logger = LoggerFactory.getLogger(DataTransferService.class);
     @Autowired
     ConsentRepository consentRepository;
     @Autowired
@@ -41,6 +44,7 @@ public class DataTransferService {
     @Autowired
     CareContextRepository careContextRepository;
     public String[] saveHIPNotifyConsent(JSONObject notification) {
+        logger.info("eneteing saveHIPNotifyConsent with data: " + notification);
         Consent consent = new Consent();
         consent.setRequestId(notification.getString("requestId"));
         notification = notification.getJSONObject("notification");
@@ -64,10 +68,12 @@ public class DataTransferService {
         consent.setAccessMode(notification.getJSONObject("permission").getString("accessMode"));
         consent.setPatientReferenceWhenSendingData(notification.getJSONObject("patient").getString("id"));
         consentRepository.save(consent);
+        logger.info("exiting saveHIPNotifyConsent after saving consent: " + consent);
         return new String[]{consent.getConsentId(), consent.getRequestId()};
     }
 
     public void fireABDMOnNotify(String[] ids) {
+        logger.info("entering fireABDMOnNotify with data: "  + ids.toString());
         JSONObject request = prepareOnNotifyRequestObject(ids);
         HttpHeaders headers = prepareHeader(getAccessToken());
 
@@ -77,6 +83,7 @@ public class DataTransferService {
     }
 
     public void fireABDMRequestAcknowledgement(JSONObject requestObj) {
+        logger.info("entering fireABDMRequestAcknowledgement with data: " + requestObj);
         String txnId = requestObj.getString("transactionId");
         String requestId = requestObj.getString("requestId");
 
@@ -89,6 +96,7 @@ public class DataTransferService {
     }
 
     public JSONObject prepareAndSendData(JSONObject requestObj) {
+        logger.info("entering prepareAndSendData with data: " + requestObj);
         Consent consent = consentRepository.findConsentByConsentId(requestObj.getJSONObject("hiRequest").getJSONObject("consent").getString("id"));
         JSONObject object = prepareDataToTransfer(consent, requestObj);
         String dataPushUrl = requestObj.getJSONObject("hiRequest").getString("dataPushUrl");
@@ -100,38 +108,10 @@ public class DataTransferService {
         restTemplate.postForObject(dataPushUrl, entity, String.class);
         return object;
     }
-/*
-{
-		"pageNumber": 0,
-		"pageCount": 0,
-		"transactionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-		"entries": [
-			{
-				"content": "Encrypted content of data packaged in FHIR bundle",
-				"media": "application/fhir+json",
-				"checksum": "string",
-				"careContextReference": "RVH1008"
-			},
-			{
-				"link": "https://data-from.net/sa2321afaf12e13",
-				"media": "application/fhir+json",
-				"checksum": "string",
-				"careContextReference": "NCC1701"
-			}
-		],
-		"keyMaterial": {
-			"cryptoAlg": "ECDH",
-			"curve": "Curve25519",
-			"dhPublicKey": {
-				"expiry": "2023-04-17T07:00:17.379Z",
-				"parameters": "Curve25519/32byte random key",
-				"keyValue": "string"
-			},
-		"nonce": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-		}
-	}
- */
     public void sendDataTransferCompletedNotification(JSONObject object, JSONObject requestObj) {
+        logger.info("entering sendDataTransferCompletedNotification with data: ");
+        logger.info("object : " + object.toString());
+        logger.info("requestbObj: "+ requestObj);
         Consent consent = consentRepository.findConsentByConsentId(requestObj.getJSONObject("hiRequest").getJSONObject("consent").getString("id"));
         JSONObject obj = prepareDeliveredNotification(object, requestObj, consent);
         HttpHeaders headers = prepareHeader(getAccessToken());

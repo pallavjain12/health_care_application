@@ -1,9 +1,16 @@
 package com.example.demo.helper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import static com.example.demo.helper.misc.getRandomUUID;
 public class FHIRJSON {
+    static Logger logger = LoggerFactory.getLogger(DataEncrypterDecrypter.class);
+
     public static String prepareFHIRJSONString(String doctorId, String patientName, String doctorName, String dosageInstructions, String patientId, String diagnosis, String medicineName)  {
+        logger.info("entering prepareFHIRJSONString with data");
+        logger.info(" " + doctorId+" " +patientName+" " +doctorName+" " +dosageInstructions+" " +patientId+" " +diagnosis+" " +medicineName);
         return fillFHIRJSON(doctorId,patientName,doctorName,dosageInstructions,patientId,diagnosis,medicineName);
     }
 

@@ -79,4 +79,15 @@ public class Visit {
     public void setDiagnosis(String diagnosis) {
         this.diagnosis = diagnosis;
     }
+
+    public String toString() {
+        return "\nprescription: " + prescription+
+                "\ndosageInstruction: " + dosageInstruction+
+                "\ndiagnosis: " + diagnosis+
+                "\nvisitdate: " + visitDate.toString()+
+                "\nreferenceNumber: " + referenceNumber+
+                "\ndisplay: " + display +
+                "\nRequestId: " + requestId;
+
+    }
 }

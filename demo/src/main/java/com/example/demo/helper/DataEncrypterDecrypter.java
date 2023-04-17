@@ -26,6 +26,7 @@ import java.security.spec.X509EncodedKeySpec;
  If you are making both the system by your self use this sample implementation
 */
 
+import com.example.demo.helper.Service.VisitServiceHelper;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
@@ -41,6 +42,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.codec.ServerSentEvent;
 
 import javax.crypto.KeyAgreement;
@@ -56,6 +59,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class DataEncrypterDecrypter {
+    static Logger logger = LoggerFactory.getLogger(DataEncrypterDecrypter.class);
     public static final String ALGORITHM = "ECDH";
     public static final String CURVE = "curve25519";
     public static final String PROVIDER = BouncyCastleProvider.PROVIDER_NAME;
@@ -88,8 +92,8 @@ public class DataEncrypterDecrypter {
 //        System.out.println("decryptedData: "+decryptedData);
     }
     public static HashMap<String, String> receiverKeys() {
+        logger.info("Entering receive keys with no data");
         Security.addProvider(new BouncyCastleProvider());
-        KeyPair pair;
         String privateKey = "";
         String publicKey = "";
         String random = "";
@@ -100,9 +104,12 @@ public class DataEncrypterDecrypter {
             privateKey = getBase64String(getEncodedPrivateKey(receiverKeyPair.getPrivate()));
             publicKey = getBase64String(getEncodedPublicKeyFor(receiverKeyPair.getPublic()));
             random = generateRandomKey();
+            logger.info("privateKey = " + privateKey);
+            logger.info("public key = " + publicKey);
+            logger.info("random = " + random);
         }
         catch (Exception e) {
-            System.out.println("Unable to generate Keys : " + e);
+            logger.error("unable to generate keys : " + e);
             return null;
         }
 
@@ -110,6 +117,7 @@ public class DataEncrypterDecrypter {
         map.put("privateKey", privateKey);
         map.put("publicKey", publicKey);
         map.put("random", random);
+        logger.info("Exiting receiverKeys with data: " + map);
         return map;
     }
     public static String encryptFHIRData(String receiverPublicKey, String randomReceiver, String data, String senderPrivateKey, String randomSender) {
@@ -119,7 +127,7 @@ public class DataEncrypterDecrypter {
             return encrypt(xorOfRandom, senderPrivateKey, receiverPublicKey, data);
         }
         catch (Exception e) {
-            System.out.println("unable to encrypt data : " + e);
+            logger.error("Unable  to encrypt data: " + e);
             return null;
         }
     }
@@ -131,7 +139,7 @@ public class DataEncrypterDecrypter {
             return decryptedData;
         }
         catch (Exception e) {
-            System.out.println("Unable to decrypt data : " + e);
+            logger.error("Unable to decrypt data");
             return null;
         }
 

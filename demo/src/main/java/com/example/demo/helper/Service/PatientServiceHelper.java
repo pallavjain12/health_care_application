@@ -3,6 +3,8 @@ package com.example.demo.helper.Service;
 import com.example.demo.model.Patient;
 import com.example.demo.service.VisitService;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -13,8 +15,9 @@ import static com.example.demo.helper.misc.getRandomUUID;
 import static com.example.demo.helper.misc.getTimeStamp;
 
 public class PatientServiceHelper {
-    VisitService visitService;
+    static Logger logger = LoggerFactory.getLogger(PatientServiceHelper.class);
     public static JSONObject prepareGenerateOTPEntity(String abhaId) {
+        logger.info("Entering prepareGenerateOTPEntity with data abhaId: " + abhaId);
         JSONObject request = new JSONObject();
         request.put("requestId", getRandomUUID());
         request.put("timestamp", getTimeStamp());
@@ -27,18 +30,12 @@ public class PatientServiceHelper {
                 requester.put("id", "team-29-hip-1");
             query.put("requester", requester);
         request.put("query", query);
+        logger.info("Exiting prepareGenerateOTPEntity with data: " + request.toString());
         return request;
     }
 
-    public static HttpHeaders prepareGenerateOTPHeader(String authToken) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(authToken);
-        headers.set("X-CM-ID", "sbx");
-        return headers;
-    }
-
     public static JSONObject prepareConfirmOTPRequest (String txnId, String otp) {
+        logger.info("Entering prepareConfirmOTPRequest with data txnId: " + txnId + " otp: " + otp);
         JSONObject request = new JSONObject();
         request.put("requestId", getRandomUUID());
         request.put("timestamp", getTimeStamp());
@@ -48,19 +45,12 @@ public class PatientServiceHelper {
         credential.put("authCode", otp);
 
         request.put("credential", credential);
-
+        logger.info("Exiting prepareConfirmOTPRequest with data: " + request.toString());
         return request;
     }
 
-    public static HttpHeaders prepareConfirmOTPHeader(String authToken) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(authToken);
-        headers.set("X-CM-ID", "sbx");
-        return headers;
-    }
-
     public static Patient createNewPatient(JSONObject request) {
+        logger.info("Entering createNewPatient with data: " + request);
         Patient patient = new Patient();
         patient.setAbhaId(request.getString("id"));
         patient.setName(request.getString("name"));
@@ -71,6 +61,7 @@ public class PatientServiceHelper {
         patient.setRegistrationDateTime(LocalDate.now());
         patient.setMobile(request.getString("mobile"));
         patient.setAbhaNumber(request.getString("abhaNumber"));
+        logger.info("Exiting createNewPatient with data: " + patient);
         return patient;
     }
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Entity
@@ -142,5 +143,25 @@ public class Consent {
 
     public void setPatientReferenceWhenSendingData(String patientReferenceWhenSendingData) {
         this.patientReferenceWhenSendingData = patientReferenceWhenSendingData;
+    }
+
+    public String toString() {
+        return "id: " + id +
+                "\nStatus: " + status +
+                "\nconsentId: " +consentId +
+                "\nhiTpyes: " +hiTypes +
+                "\nsignature: " +signature +
+                "\naccessMode: " +accessMode +
+                "\ntransactionId: " + transactionId+
+                "\nreceiverPublicKey: " +receiverPublicKey +
+                "\n: receiverPrivateKey" + receiverPrivateKey+
+                "\n: receiveNonce" +receiverNonce +
+                "\nrequestId: " +requestId +
+                "\ndataFrom: " + dataFrom+
+                "\ndataTo: " + dataTo+
+                "\ndataEraseAt: " + dataEraseAt+
+                "\npatientReferenceWhenSendingData: " + patientReferenceWhenSendingData+
+                "\nconsentList: " + Arrays.toString(careContextList.toArray());
+
     }
 }

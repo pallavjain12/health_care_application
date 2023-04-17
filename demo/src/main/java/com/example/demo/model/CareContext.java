@@ -116,4 +116,20 @@ public class CareContext {
     public void setDoctorName(String doctorName) {
         this.doctorName = doctorName;
     }
+
+    public String toString() {
+        return "" +
+                "id: " + id +
+                "\nPatientReference: " + patientReference +
+                "\nCarecontextRefernce: " + careContextReference +
+                "\ndata: " + data +
+                "\nencryptedData: " + encryptedData +
+                "\nprescription: " + prescription +
+                "\ndiagnosis: "+ diagnosis +
+                "\ndosageInstruction: " + dosageInstruction +
+                "\npatientName: "+ patientName +
+                "\npatentId: " + patientId +
+                "\ndoctorId: "  + doctorId +
+                "\ndoctorName: " + doctorName;
+    }
 }

@@ -1,14 +1,14 @@
 package com.example.demo.helper.Service;
 
 import com.example.demo.constants.StringToChange;
+import com.example.demo.controllers.VisitController;
 import com.example.demo.model.CareContext;
 import com.example.demo.model.Consent;
 import com.example.demo.model.Visit;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import javax.print.attribute.standard.JobStateReasons;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,7 +19,10 @@ import static com.example.demo.helper.misc.getRandomUUID;
 import static com.example.demo.helper.misc.getTimeStamp;
 
 public class DataTransferServiceHelper {
+
+    static Logger logger = LoggerFactory.getLogger(DataTransferServiceHelper.class);
     public static CareContext convertVisitIntoCareContext(Visit visit) {
+        logger.info("Entering convertVisitIntoCareContext with data: " + visit);
         CareContext careContext = new CareContext(visit.getReferenceNumber(), visit.getDisplay());
 
         careContext.setCareContextReference(visit.getReferenceNumber());
@@ -33,10 +36,12 @@ public class DataTransferServiceHelper {
         careContext.setDoctorId("" + visit.getDoctor().getId());
         careContext.setPatientId("" + visit.getPatient().getId());
         careContext.setPatientName("" + visit.getPatient().getName());
+        logger.info("Exiting convertVisitIntoCareContext with data: " + careContext);
         return careContext;
     }
 
     public static JSONObject prepareOnNotifyRequestObject(String[] ids) {
+        logger.info("Entering prepareOnNotifyRequestObject wiht data" + ids.toString());
         JSONObject response = new JSONObject();
 
         response.put("resp", new JSONObject());
@@ -45,11 +50,12 @@ public class DataTransferServiceHelper {
         response.put("acknowledgement", new JSONObject());
         response.getJSONObject("acknowledgement").put("status", "OK");
         response.getJSONObject("acknowledgement").put("consentId", ids[0]);
-
+        logger.info("Exiting prepareOnNotifyRequestObject with data: " + response.toString());
         return response;
     }
 
     public static JSONObject prepareRequestAcknowledgementRequest(String txnId, String requestId) {
+        logger.info("Entering prepareRequestAcknowledgementRequest with data: txnId: " + txnId + " requestId: " + requestId);
         JSONObject response = new JSONObject();
         response.put("resp", new JSONObject());
         response.getJSONObject("resp").put("requestId", requestId);
@@ -60,17 +66,20 @@ public class DataTransferServiceHelper {
         response.put("hiRequest", new JSONObject());
         response.getJSONObject("hiRequest").put("transactionId", txnId);
         response.getJSONObject("hiRequest").put("sessionStatus", "ACKNOWLEDGED");
-
+        logger.info("Exiting prepareRequestAcknowledgementRequest with data: " + response.toString());
         return response;
     }
 
     public static JSONObject prepareDataToTransfer(Consent consent, JSONObject requestObj) {
+        logger.info("Entering prepareDataToTransfer with data: ");
+        logger.info("Consent : " + consent);
+        logger.info("requestObj: " + requestObj);
         String txnId = requestObj.getString("transactionId");
         String randomReceiver = requestObj.getJSONObject("hiRequest").getJSONObject("keyMaterial").getString("nonce");
         String receiverPublicKey = requestObj.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").getString("keyValue");
 
         if (consent == null) {
-            System.out.println("consent not found with consent id " + requestObj.getJSONObject("hiRequest").getJSONObject("consent").getString("id"));
+            logger.error("consent not found with consent id " + requestObj.getJSONObject("hiRequest").getJSONObject("consent").getString("id"));
             return null;
         }
 
@@ -100,36 +109,15 @@ public class DataTransferServiceHelper {
             entryObject.put("careContextReference", careContext.getCareContextReference());
             dataObject.getJSONArray("entries").put(entryObject);
         }
+        logger.info("Exiting prepareDataToTransfer with data: " + dataObject.toString());
         return dataObject;
     }
 
     public static JSONObject prepareDeliveredNotification(JSONObject object, JSONObject requestObj, Consent consent) {
-                /*
-        {
-		"requestId": "499a5a4a-7dda-4f20-9b67-e24589627061",
-		"timestamp": "2023-04-17T07:00:57.431Z",
-		"notification": {
-			"consentId": "a1s2c932-2f70-3ds3-a3b5-2sfd46b12a18d",
-			"transactionId": "a1s2c932-2f70-3ds3-a3b5-2sfd46b12a18d",
-			"doneAt": "2023-04-17T07:00:57.431Z",
-			"notifier": {
-				"type": "HIU",
-				"id": "tmh"
-			},
-			"statusNotification": {
-				"sessionStatus": "TRANSFERRED",
-				"hipId": "max",
-				"statusResponses": [
-					{
-					"careContextReference": "string",
-					"hiStatus": "OK",
-					"description": "string"
-					}
-				]
-			}
-		}
-	}
-         */
+        logger.info("Entering prepareDeliveredNotification with data: ");
+        logger.info("object: " + object.toString());
+        logger.info("requestObj " + requestObj.toString());
+        logger.info("consent " + consent);
         JSONObject response = new JSONObject();
         response.put("requestId", getRandomUUID());
         response.put("timestamp", getTimeStamp());
@@ -156,6 +144,7 @@ public class DataTransferServiceHelper {
             tempObj.put("description", "string");
             response.getJSONObject("notification").getJSONObject("statusNotification").getJSONArray("sessionStatus").put(tempObj);
         }
+        logger.info("Exiting prepareDeliveredNotification with data: " + response.toString());
         return response;
     }
 }

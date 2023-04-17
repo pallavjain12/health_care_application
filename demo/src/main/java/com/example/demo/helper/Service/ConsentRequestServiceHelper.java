@@ -1,14 +1,16 @@
 package com.example.demo.helper.Service;
 
 import com.example.demo.constants.StringConstants;
+import com.example.demo.controllers.VisitController;
 import com.example.demo.helper.DataEncrypterDecrypter;
 import com.example.demo.model.CareContext;
 import com.example.demo.model.Consent;
 import com.example.demo.model.ConsentRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,15 +18,19 @@ import static com.example.demo.helper.misc.getRandomUUID;
 import static com.example.demo.helper.misc.getTimeStamp;
 
 public class ConsentRequestServiceHelper {
+    static Logger logger = LoggerFactory.getLogger(VisitController.class);
     public static JSONObject prepareFetchRequestObj(String consentId) {
+        logger.info("Entering prepareFetchRequestObj with data: consentId = " + consentId);
         JSONObject ans = new JSONObject();
         ans.put("requestId", getRandomUUID());
         ans.put("timestamp", getTimeStamp());
         ans.put("consentId", consentId);
+        logger.info("Exiting prepareFetchRequestObj with data: " + ans.toString());
         return ans;
     }
 
     public static JSONObject getConsentObjectForInIt(ConsentRequest consentRequest) {
+        logger.info("Entering getConsentObjectForInit with data: consentRequest " + consentRequest.toString());
         JSONObject consent = new JSONObject();
         consent.put("purpose", new JSONObject());
         consent.getJSONObject("purpose").put("text", consentRequest.getPurpose());
@@ -56,25 +62,12 @@ public class ConsentRequestServiceHelper {
         consent.getJSONObject("permission").getJSONObject("frequency").put("unit", "HOUR");
         consent.getJSONObject("permission").getJSONObject("frequency").put("value", 1);
         consent.getJSONObject("permission").getJSONObject("frequency").put("repeats", 0);
+        logger.info("Exiting getConsentObjectForInIt with data: consent = " + consent);
         return consent;
     }
-    /*
-    {
-			"keyMaterial": {
-				"cryptoAlg": "ECDH",
-				"curve": "Curve25519",
-				"dhPublicKey": {
-					"expiry": "2023-04-15T18:42:28.415Z",
-					"parameters": "Curve25519/32byte random key",
-					"keyValue": "string"
-				},
-				"nonce": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-			}
-		}
-	}
-     */
 
     public static JSONObject prepareHealthInformationCMRequest(Consent consent) {
+        logger.info("Entering prepareHealthInformationCMRequest with data: consent = " + consent);
         JSONObject response = new JSONObject();
         response.put("requestId", getRandomUUID());
         response.put("timeStamp", getTimeStamp());
@@ -97,6 +90,7 @@ public class ConsentRequestServiceHelper {
         response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("parameters", "Ephemeral public key");
         response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("keyValue", consent.getReceiverPublicKey());
         response.getJSONObject("hiRequest").getJSONObject("keyMaterial").put("nonce", consent.getReceiverNonce());
+        logger.info("exiting prepareHealthInformationCMRequest with data : " + response);
         return response;
     }
 
@@ -110,8 +104,15 @@ public class ConsentRequestServiceHelper {
     }
 
     public static HashMap<String, String> updateCareContextData(String senderNonce, String senderPublicKey, String receiverNonce, String receiverPrivateKey, String encryptedData) {
+        logger.info("Entering updateCareContextData with data: ");
+        logger.info("sender Nonce : " + senderNonce);
+        logger.info("sender Public Key : " + senderPublicKey);
+        logger.info("receiverNonce: "  + receiverNonce);
+        logger.info("receiverPrivate Key: " + receiverPrivateKey);
+        logger.info("encrpytedData: " + encryptedData);
         try {
             String decryptedData = DataEncrypterDecrypter.decrypt(encryptedData, senderPublicKey, senderNonce, receiverPrivateKey, receiverNonce);
+            logger.info("decrypted data: " + decryptedData);
             return readFHIRDataAndUpdateCareContext(decryptedData);
         }
         catch (Exception e) {
@@ -121,6 +122,7 @@ public class ConsentRequestServiceHelper {
     }
 
     public static HashMap<String, String> readFHIRDataAndUpdateCareContext(String decryptedData) {
+        logger.info("Entering readFHIRDataAndUpdateCareContext with data: " + decryptedData);
         JSONObject obj = new JSONObject(decryptedData);
         JSONArray arr =  obj.getJSONArray("entry");
         String doctorId = "", patientName = "", doctorName = "", dosageInstructions = "", patientId = "", diagnosis = "", medicineName = "";
@@ -158,6 +160,7 @@ public class ConsentRequestServiceHelper {
         map.put("diagnosis", diagnosis);
         map.put("patientName", patientName);
         map.put("patientId", patientId);
+        logger.info("Exiting readFHIRDataAndUpdateCareContext with data: " + map);
         return map;
     }
 }
