@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
@@ -28,7 +29,10 @@ public class Visit {
     @JoinColumn(name = "doctor_id", referencedColumnName = "id")
     private Employee doctor;
 
+    @Column
     private String requestId;
+    @Column
+    private boolean isDisabled = false;
 
     public Visit(LocalDate visitDate, String referenceNumber, String display) {
         this.visitDate = visitDate;
@@ -87,7 +91,28 @@ public class Visit {
                 "\nvisitdate: " + visitDate.toString()+
                 "\nreferenceNumber: " + referenceNumber+
                 "\ndisplay: " + display +
-                "\nRequestId: " + requestId;
+                "\nRequestId: " + requestId +
+                "\nisDisables: " + isDisabled;
 
+    }
+
+    public void setVisitDate(LocalDate visitDate) {
+        this.visitDate = visitDate;
+    }
+
+    public void setReferenceNumber(String referenceNumber) {
+        this.referenceNumber = referenceNumber;
+    }
+
+    public void setDisplay(String display) {
+        this.display = display;
+    }
+
+    public boolean isDisabled() {
+        return isDisabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        isDisabled = disabled;
     }
 }

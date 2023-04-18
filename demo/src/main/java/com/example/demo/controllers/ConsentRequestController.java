@@ -6,17 +6,21 @@ import com.example.demo.service.EmployeeService;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.demo.service.ConsentRequestService;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.HashMap;
 
+@RestController
 public class ConsentRequestController {
     Logger logger = LoggerFactory.getLogger(ConsentRequestController.class);
+    @Autowired
     ConsentRequestService consentRequestService;
     HashMap<String, SseEmitter> map = new HashMap<>();
 
@@ -70,8 +74,9 @@ public class ConsentRequestController {
 
     @PostMapping("/v0.5/consents/hiu/notify")
     @CrossOrigin
-    public void hiuConsentNotify(@RequestBody JSONObject requestBody) {
-        logger.info("Entering hiuConsentNotifyClass with requestBody: " + requestBody.toString());
+    public void hiuConsentNotify(@RequestBody String str) {
+        JSONObject requestBody = new JSONObject(str);
+        logger.info("Entering hiuConsentNotifyClass with requestBody: " + requestBody);
         boolean consentGranted = consentRequestService.updateConsentRequestStatus(requestBody);
         logger.info("Consent granted = " + consentGranted);
         if (consentGranted) consentRequestService.fireArtifactsFetchRequest(requestBody.getJSONObject("notification").getJSONArray("consentArtefacts"));
@@ -80,23 +85,28 @@ public class ConsentRequestController {
 
     @PostMapping("/v0.5/consents/on-fetch")
     @CrossOrigin
-    public void onFetch(@RequestBody JSONObject requestBody) {
-        logger.info("Entering onFetch method with requestBody: " + requestBody.toString());
+    public void onFetch(@RequestBody String str) {
+        JSONObject requestBody = new JSONObject(str);
+        logger.info("Entering onFetch method with requestBody: " + requestBody);
         Consent consent = consentRequestService.updateConsentRequestAfterOnFetch(requestBody);
         consentRequestService.fireABDMHealthInformationCMRequest(consent);
         logger.info("Exiting onFetch");
     }
 
     @PostMapping("/v0.5/health-information/cm/on-request")
-    public void onRequest(@RequestBody JSONObject requestBody) {
-        logger.info("Entering onRequest method with requestBody: " + requestBody.toString());
+    @CrossOrigin
+    public void onRequest(@RequestBody String str) {
+        JSONObject requestBody = new JSONObject(str);
+        logger.info("Entering onRequest method with requestBody: " + requestBody);
         consentRequestService.updateConsentTransactionId(requestBody);
         logger.info("Exiting onRequest");
     }
 
     @PostMapping("/data/push")
-    public void dataPush(@RequestBody JSONObject data) {
-        logger.info("Entering /data/push with data: " + data.toString());
+    @CrossOrigin
+    public void dataPush(@RequestBody String str) {
+        JSONObject data = new JSONObject(str);
+        logger.info("Entering /data/push with data: " + data);
         consentRequestService.saveData(data);
         logger.info("exiting /data/pus");
     }

@@ -3,27 +3,27 @@ package com.example.demo.controllers;
 import com.example.demo.constants.StringConstants;
 import com.example.demo.model.Employee;
 import com.example.demo.service.EmployeeService;
+import jakarta.persistence.Column;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 
 import static com.example.demo.common.ResponseHelper.serverSideError;
 
-@RestController()
+@RestController
+@CrossOrigin
 public class EmployeeController {
 
     Logger logger = LoggerFactory.getLogger(EmployeeController.class);
     @Autowired
     EmployeeService employeeService;
     @PostMapping("/employee")
+    @CrossOrigin
     public String addEmployee(@RequestBody Employee employee) {
         logger.info("Entering addEmployee with data: " + employee.toString());
         try {
@@ -36,6 +36,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/employee")
+    @CrossOrigin
     public String getEmployee(@RequestBody HashMap<String, String> request) {
         logger.info("Entering getEmployee with data: " + request);
         try {
@@ -48,6 +49,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/employees")
+    @CrossOrigin
     public String getAllEmployees() {
         logger.info("Entering getAllEmployees with no data");
         try {
@@ -60,6 +62,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/login")
+    @CrossOrigin
     public String login(@RequestBody HashMap<String, String> map) {
         logger.info("Entering login with data: " + map);
         try {

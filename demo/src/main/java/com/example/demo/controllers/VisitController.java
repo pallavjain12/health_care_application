@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.model.Patient;
 import com.example.demo.repository.PatientRepository;
 import com.example.demo.service.VisitService;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 @RestController
@@ -25,11 +27,14 @@ public class VisitController {
     private static HashMap<String, SseEmitter> map = new HashMap<>();
     @PostMapping("/add-visit")
     @CrossOrigin
-    public SseEmitter addNewVisit(@RequestParam("patient_id") Long patient_id, @RequestParam("authToken") String patientAuthToken) {
+    public SseEmitter addNewVisit(@RequestBody String request) {
+        JSONObject obj = new JSONObject(request);
+        String patient_id = obj.getString("patientId");
+        String patientAuthToken = obj.getString("accessToken");
         logger.info("Entering addNewVisitClass wtih data: patientId - " + patient_id + " authToken: " + patientAuthToken);
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
 
-        Patient patient = patientRepository.findPatientById(patient_id);
+        Patient patient = patientRepository.findPatientById(Long.parseLong(patient_id));
         String requestId = visitService.addCareContext(patient, patientAuthToken);
 
         /*
@@ -38,7 +43,7 @@ public class VisitController {
         if (requestId == null)    throw new RuntimeException("unable to send request");
 
         try {
-            emitter.send(SseEmitter.event().name("connectionSuccessfull"));
+            emitter.send(SseEmitter.event().name("add-visit"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -56,10 +61,12 @@ public class VisitController {
 
         try {
             emitter.send(SseEmitter.event().name("on-init").data(respond[1]));
+            emitter.complete();
             map.remove(respond[0]);
         }
         catch (Exception e) {
             System.out.println(e);
+            emitter.complete();
             map.remove(respond[0]);
         }
     }

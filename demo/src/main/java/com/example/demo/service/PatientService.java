@@ -55,7 +55,7 @@ public class PatientService {
             JSONObject auth = obj.getJSONObject("auth");
             respond.put(StringConstants.STATUS, StringConstants.SUCCESSFULL);
             respond.put(StringConstants.MSG, "OTP sent Successfully");
-            respond.put(StringConstants.DATA, new JSONObject().put("transactionId", auth.getString("transactionId")).toString());
+            respond.put(StringConstants.DATA, new JSONObject().put("transactionId", auth.getString("transactionId")));
         }
 
         ans[1] = respond.toString();
@@ -65,6 +65,7 @@ public class PatientService {
     }
 
     public String fireABDMConfirmOTP(String transactionId, String OTP) {
+        logger.info("entering fireABDMConfirmOTP with data: transactionId: " + transactionId + " OTP: " + OTP);
         String authToken = TokenUtil.getAccessToken();
         if (authToken.equals("-1")) return null;
 
@@ -75,16 +76,22 @@ public class PatientService {
 
         HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
         restTemplate.postForObject(APIList.AUTH_CONFIRM, entity, String.class);
-
+        logger.info("returning requestID: " + request.get("requestId").toString());
         return request.get("requestId").toString();
     }
 
-    public String[] prepareOnConfirmOTPResponse(String response) {
+    public JSONObject prepareOnConfirmOTPResponse(String response) {
         String[] ans = new String[2];
 
         JSONObject obj = new JSONObject(response);
+        if (!obj.isNull("error")) {
+            JSONObject errorObj = new JSONObject();
+            errorObj.put(StringConstants.STATUS, StringConstants.UNSUCCESSFULL);
+            errorObj.put(StringConstants.MSG, obj.getJSONObject("error").getString("message"));
+            return errorObj;
+        }
+
         JSONObject auth = obj.getJSONObject("auth");
-        JSONObject resp = obj.getJSONObject("resp");
         JSONObject respond = new JSONObject();
 
         JSONObject patientObj =  auth.getJSONObject("patient");
@@ -101,17 +108,13 @@ public class PatientService {
 
         Patient newPatient = patientRepository.findPatientByAbhaId(patientObj.getString("id"));
         newPatient = (newPatient != null) ? newPatient : patientRepository.save(createNewPatient(patientObj));
-        respond.put("patient", newPatient);
+        respond.put("patient", newPatient.getPatientJSONObject());
         respond.put("accessToken", auth.getString("accessToken"));
 
         JSONObject finalObj = new JSONObject();
         finalObj.put(StringConstants.STATUS, StringConstants.SUCCESSFULL);
         finalObj.put(StringConstants.MSG, "Data fetched successfully");
-        finalObj.put(StringConstants.DATA, response);
-
-        ans[0] = resp.get("requestId").toString();
-        ans[1] = finalObj.toString();
-
-        return ans;
+        finalObj.put(StringConstants.DATA, respond);
+        return finalObj;
     }
 }

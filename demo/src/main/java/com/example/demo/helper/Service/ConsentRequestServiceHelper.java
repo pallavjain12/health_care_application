@@ -1,6 +1,7 @@
 package com.example.demo.helper.Service;
 
 import com.example.demo.constants.StringConstants;
+import com.example.demo.constants.StringToChange;
 import com.example.demo.controllers.VisitController;
 import com.example.demo.helper.DataEncrypterDecrypter;
 import com.example.demo.model.CareContext;
@@ -80,7 +81,7 @@ public class ConsentRequestServiceHelper {
         response.getJSONObject("hiRequest").getJSONObject("dateRange").put("from", consent.getDataFrom());
         response.getJSONObject("hiRequest").getJSONObject("dateRange").put("to", consent.getDataTo());
 
-        response.getJSONObject("hiRequest").put("dataPushUrl", StringConstants.DATA_PUSH_URL);
+        response.getJSONObject("hiRequest").put("dataPushUrl", StringToChange.DATA_PUSH_URL);
 
         response.getJSONObject("hiRequest").put("keyMaterial", new JSONObject());
         response.getJSONObject("hiRequest").getJSONObject("keyMaterial").put("cryptoAlg", StringConstants.CRYPTO_ALGO);

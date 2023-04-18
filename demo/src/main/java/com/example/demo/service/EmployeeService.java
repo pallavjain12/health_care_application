@@ -26,13 +26,13 @@ public class EmployeeService {
         JSONObject obj = new JSONObject();
         obj.put(StringConstants.STATUS, StringConstants.SUCCESSFULL);
         obj.put(StringConstants.MSG, "Employee added successfully");
-        obj.put(StringConstants.DATA, savedEmployee.toString());
-        logger.info("exiting wiht data: " + obj.toString());
+        obj.put(StringConstants.DATA, savedEmployee);
+        logger.info("exiting with data: " + obj);
         return obj.toString();
     }
 
     public String getEmployeeById(long id) {
-        logger.info("entering wiht data: " + id);
+        logger.info("entering with data: " + id);
         Employee employee = employeeRepository.findEmployeeById(id);
         if (employee == null) {
             return serverSideError("No Employee found with id: " + id);

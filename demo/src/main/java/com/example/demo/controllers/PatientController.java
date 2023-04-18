@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.constants.StringConstants;
 import com.example.demo.model.Employee;
 import com.example.demo.service.PatientService;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class PatientController {
         }
 
         try {
-            sseEmitter.send(SseEmitter.event().name("connectionSuccessfull"));
+            sseEmitter.send(SseEmitter.event().name("generate-otp"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -86,17 +87,24 @@ public class PatientController {
     @PostMapping("/v0.5/users/auth/on-confirm")
     public void onConfirmOTP(@RequestBody String response) {
         logger.info("Entering onConfirmOTP with data: " + response);
-        String[] respond = patientService.prepareOnConfirmOTPResponse(response);
-        SseEmitter emitter = emittersMap.get(respond[0]);
+        JSONObject obj = new JSONObject(response);
+        String requestId = obj.getJSONObject("resp").get("requestId").toString();
+        logger.info("requestId is : " + requestId);
+        logger.info("map has currently: " + emittersMap);
+        SseEmitter emitter = emittersMap.get(requestId);
         try {
-            emitter.send(SseEmitter.event().name("on-confirm").data(respond[1]));
+            JSONObject responseObje = patientService.prepareOnConfirmOTPResponse(response);
+            logger.info("received this object from prepareOnconfirmOTPresponse: " + responseObje);
+            emitter.send(SseEmitter.event().name("on-confirm").data(responseObje.toString()));
+            logger.info("sent data to client");
             emitter.complete();
-            emittersMap.remove(respond[0]);
+            emittersMap.remove(requestId);
+            logger.info("new map state is : " + emittersMap);
         }
         catch (Exception e) {
-            System.out.println(e);
+            logger.error("Error occurred while in sending data: " + e);
             emitter.complete();
-            emittersMap.remove(respond[0]);
+            emittersMap.remove(requestId);
         }
     }
 

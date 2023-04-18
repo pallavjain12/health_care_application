@@ -48,7 +48,7 @@ public class ConsentRequestService {
         consentRequest.setDateFrom(convertDateTOZonedUTC(requestObj.getString("dateFrom")));
         consentRequest.setDateTo(convertDateTOZonedUTC(requestObj.getString("dateTo")));
         consentRequest.setDataEraseAt(convertDateTOZonedUTC(requestObj.getString("dataEraseAt")));
-        consentRequest.setAccessMode(requestObj.getString("accessMode"));
+        consentRequest.setAccessMode("VIEW");
         consentRequest.setHiTypes(requestObj.getJSONArray("hiTypes").toString());
         consentRequest.setPatient(patientRepository.findPatientById(Long.parseLong(requestObj.getString("patientId"))));
         consentRequest.setDoctor(employeeRepository.findEmployeeById(Long.parseLong(requestObj.getString("doctorId"))));

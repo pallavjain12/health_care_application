@@ -115,7 +115,7 @@ public class Patient {
         this.visits.add(visit);
     }
 
-    public String toString() {
+    public JSONObject getPatientJSONObject() {
         JSONObject obj = new JSONObject();
         obj.put("id", id);
         obj.put("name", name);
@@ -125,7 +125,7 @@ public class Patient {
         obj.put("gender", gender);
         obj.put("mobile", mobile);
         obj.put("email", email);
-        return obj.toString();
+        return obj;
     }
 }
 
