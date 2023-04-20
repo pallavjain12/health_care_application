@@ -94,12 +94,10 @@ public class PatientController {
         SseEmitter emitter = emittersMap.get(requestId);
         try {
             JSONObject responseObje = patientService.prepareOnConfirmOTPResponse(response);
-            logger.info("received this object from prepareOnconfirmOTPresponse: " + responseObje);
             emitter.send(SseEmitter.event().name("on-confirm").data(responseObje.toString()));
             logger.info("sent data to client");
             emitter.complete();
             emittersMap.remove(requestId);
-            logger.info("new map state is : " + emittersMap);
         }
         catch (Exception e) {
             logger.error("Error occurred while in sending data: " + e);

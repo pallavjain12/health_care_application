@@ -18,9 +18,9 @@ public class APIList {
     public static final String CARE_CONTEXT_INIT = "https://dev.abdm.gov.in/gateway/v0.5/consent-requests/init";
     public static final String CARE_CONTEXT_FETCH = "https://dev.abdm.gov.in/gateway/v0.5/consents/fetch";
     public static final String HEALTH_DATA_REQUEST = "https://dev.abdm.gov.in/gateway/v0.5/health-information/cm/request";
-    public static final String HIP_REQUEST_ON_NOTIFY = "/v0.5/consents/hip/on-notify";
-    public static final String HIP_REQUEST_ON_REQUEST = "/v0.5/health-information/hip/on-request";
-    public static final String HIP_ON_DATA_TRANSFER_COMPLETE_NOTIFY = "/v0.5/health-information/notify";
+    public static final String HIP_REQUEST_ON_NOTIFY = "https://dev.abdm.gov.in/gateway/v0.5/consents/hip/on-notify";
+    public static final String HIP_REQUEST_ON_REQUEST = "https://dev.abdm.gov.in/gateway/v0.5/health-information/hip/on-request";
+    public static final String HIP_ON_DATA_TRANSFER_COMPLETE_NOTIFY = "https://dev.abdm.gov.in/gateway/v0.5/health-information/notify";
 
     public static void main(String[] args) {
         String doctorName = "Abdul bari";

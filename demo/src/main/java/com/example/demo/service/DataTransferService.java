@@ -2,14 +2,8 @@ package com.example.demo.service;
 
 import com.example.demo.common.APIList;
 import com.example.demo.constants.StringToChange;
-import com.example.demo.model.CareContext;
-import com.example.demo.model.Consent;
-import com.example.demo.model.Patient;
-import com.example.demo.model.Visit;
-import com.example.demo.repository.CareContextRepository;
-import com.example.demo.repository.ConsentRepository;
-import com.example.demo.repository.PatientRepository;
-import com.example.demo.repository.VisitRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -20,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,7 +31,7 @@ import static com.example.demo.utility.TokenUtil.getAccessToken;
 public class DataTransferService {
     Logger logger = LoggerFactory.getLogger(DataTransferService.class);
     @Autowired
-    ConsentRepository consentRepository;
+    ConsentHIPRepository consentHIPRepository;
     @Autowired
     PatientRepository patientRepository;
     @Autowired
@@ -44,9 +39,10 @@ public class DataTransferService {
     @Autowired
     CareContextRepository careContextRepository;
     public String[] saveHIPNotifyConsent(JSONObject notification) {
-        logger.info("eneteing saveHIPNotifyConsent with data: " + notification);
-        Consent consent = new Consent();
-        consent.setRequestId(notification.getString("requestId"));
+        logger.info("entering saveHIPNotifyConsent with data: " + notification);
+
+        ConsentHIP consent = new ConsentHIP();
+        consent.setRequestId(notification.get("requestId").toString());
         notification = notification.getJSONObject("notification");
 
         consent.setStatus(notification.getString("status"));
@@ -60,6 +56,9 @@ public class DataTransferService {
             Visit visit = visitRepository.findVisitByReferenceNumber(obj.getString("careContextReference"));
             System.out.println("care context not found " + obj.getString("careContextReference"));
             if (visit == null)  continue;
+
+            // This indicates that the visit has not been finished; a visit was made, but the patient has not seen the doctor.
+            if (!visit.isDisabled()) continue;
             CareContext careContext = convertVisitIntoCareContext(visit);
             careContextRepository.save(careContext);
             consent.addCareContext(careContext);
@@ -67,13 +66,17 @@ public class DataTransferService {
         consent.setHiTypes(notification.getJSONArray("hiTypes").toString());
         consent.setAccessMode(notification.getJSONObject("permission").getString("accessMode"));
         consent.setPatientReferenceWhenSendingData(notification.getJSONObject("patient").getString("id"));
-        consentRepository.save(consent);
-        logger.info("exiting saveHIPNotifyConsent after saving consent: " + consent);
+        consent.setDataTo(notification.getJSONObject("permission").getJSONObject("dateRange").getString("to"));
+        consent.setDataFrom(notification.getJSONObject("permission").getJSONObject("dateRange").getString("from"));
+        consent.setDataEraseAt(notification.getJSONObject("permission").getString("dataEraseAt"));
+        consentHIPRepository.save(consent);
+        logger.info("exiting saveHIPNotifyConsentHIP after saving consent: " + consent);
+
         return new String[]{consent.getConsentId(), consent.getRequestId()};
     }
 
     public void fireABDMOnNotify(String[] ids) {
-        logger.info("entering fireABDMOnNotify with data: "  + ids.toString());
+        logger.info("entering fireABDMOnNotify with data: "  + Arrays.toString(ids));
         JSONObject request = prepareOnNotifyRequestObject(ids);
         HttpHeaders headers = prepareHeader(getAccessToken());
 
@@ -85,7 +88,7 @@ public class DataTransferService {
     public void fireABDMRequestAcknowledgement(JSONObject requestObj) {
         logger.info("entering fireABDMRequestAcknowledgement with data: " + requestObj);
         String txnId = requestObj.getString("transactionId");
-        String requestId = requestObj.getString("requestId");
+        String requestId = requestObj.get("requestId").toString();
 
         JSONObject responseObj = prepareRequestAcknowledgementRequest(txnId, requestId);
         HttpHeaders headers = prepareHeader(getAccessToken());
@@ -97,7 +100,7 @@ public class DataTransferService {
 
     public JSONObject prepareAndSendData(JSONObject requestObj) {
         logger.info("entering prepareAndSendData with data: " + requestObj);
-        Consent consent = consentRepository.findConsentByConsentId(requestObj.getJSONObject("hiRequest").getJSONObject("consent").getString("id"));
+        ConsentHIP consent = consentHIPRepository.findConsentHIPByConsentId(requestObj.getJSONObject("hiRequest").getJSONObject("consent").getString("id"));
         JSONObject object = prepareDataToTransfer(consent, requestObj);
         String dataPushUrl = requestObj.getJSONObject("hiRequest").getString("dataPushUrl");
 
@@ -111,8 +114,9 @@ public class DataTransferService {
     public void sendDataTransferCompletedNotification(JSONObject object, JSONObject requestObj) {
         logger.info("entering sendDataTransferCompletedNotification with data: ");
         logger.info("object : " + object.toString());
-        logger.info("requestbObj: "+ requestObj);
-        Consent consent = consentRepository.findConsentByConsentId(requestObj.getJSONObject("hiRequest").getJSONObject("consent").getString("id"));
+        logger.info("requestObj: "+ requestObj);
+
+        ConsentHIP consent = consentHIPRepository.findConsentHIPByConsentId(requestObj.getJSONObject("hiRequest").getJSONObject("consent").getString("id"));
         JSONObject obj = prepareDeliveredNotification(object, requestObj, consent);
         HttpHeaders headers = prepareHeader(getAccessToken());
         HttpEntity<String> entity = new HttpEntity<>(obj.toString(), headers);

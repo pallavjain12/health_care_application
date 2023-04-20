@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.example.demo.common.ResponseHelper.prepareHeader;
+import static com.example.demo.helper.DataEncrypterDecrypter.receiverKeys;
 import static com.example.demo.helper.Service.ConsentRequestServiceHelper.*;
 import static com.example.demo.helper.misc.*;
 
@@ -38,21 +39,34 @@ public class ConsentRequestService {
     ConsentRepository consentRepository;
     @Autowired
     CareContextRepository careContextRepository;
+
+    @Autowired
+    VisitRepository visitRepository;
     public ConsentRequest prepareConsentRequest(String req) {
+
         logger.info("Entering prepareConsentRequest with data: " + req);
+
         JSONObject requestObj = new JSONObject(req);
         ConsentRequest consentRequest = new ConsentRequest();
         consentRequest.setPurpose(requestObj.getString("purpose"));
         consentRequest.setPurposeCode("CAREMGT");
+
         // TODO: check if converting time is good
-        consentRequest.setDateFrom(convertDateTOZonedUTC(requestObj.getString("dateFrom")));
-        consentRequest.setDateTo(convertDateTOZonedUTC(requestObj.getString("dateTo")));
-        consentRequest.setDataEraseAt(convertDateTOZonedUTC(requestObj.getString("dataEraseAt")));
+        consentRequest.setDateFrom((requestObj.getString("dateFrom")));
+        consentRequest.setDateTo((requestObj.getString("dateTo")));
+        consentRequest.setDataEraseAt((requestObj.getString("dateEraseAt")));
         consentRequest.setAccessMode("VIEW");
+
         consentRequest.setHiTypes(requestObj.getJSONArray("hiTypes").toString());
         consentRequest.setPatient(patientRepository.findPatientById(Long.parseLong(requestObj.getString("patientId"))));
         consentRequest.setDoctor(employeeRepository.findEmployeeById(Long.parseLong(requestObj.getString("doctorId"))));
+
+        Visit visit = visitRepository.findVisitById(Long.parseLong(requestObj.getString("visitId")));
+
+        consentRequest.setVisit(visit);
+        visit.addConsentRequest(consentRequest);
         logger.info("Exiting prepareConsentRequest with data if saved " + consentRequest);
+
         return consentRequestRepository.save(consentRequest);
     }
 
@@ -62,7 +76,7 @@ public class ConsentRequestService {
         response.put("requestId", getRandomUUID());
         response.put("timestamp", getTimeStamp());
         response.put("consent", getConsentObjectForInIt(consentRequest));
-        consentRequest.setRequestId(response.getString("requestId"));
+        consentRequest.setRequestId(response.get("requestId").toString());
         consentRequestRepository.save(consentRequest);
         logger.info("Exiting prepareConsentRequestInIt with data " + consentRequest);
         return response;
@@ -85,7 +99,7 @@ public class ConsentRequestService {
     public String[] prepareOnConsentRequestInitResponse(String responseBody) {
         logger.info("Entering prepareOnConsentRequestInitResponse with data : " + responseBody);
         JSONObject obj = new JSONObject(responseBody);
-        String requestId = obj.getJSONObject("resp").getString("requestId");
+        String requestId = obj.getJSONObject("resp").get("requestId").toString();
         JSONObject response = new JSONObject();
         String[] ans = new String[3];
         ans[0] = requestId;
@@ -152,14 +166,16 @@ public class ConsentRequestService {
             JSONObject requestObj = prepareFetchRequestObj(((JSONObject)arr.get(i)).getString("id"));
             HttpEntity<String> entity = new HttpEntity<String>(requestObj.toString(), headers);
             restTemplate.postForObject(APIList.CARE_CONTEXT_FETCH, entity, String.class);
-            consentRepository.findConsentByConsentId(((JSONObject)arr.get(i)).getString("id")).setRequestId(requestObj.getString("requestId"));
+            Consent consent = consentRepository.findConsentByConsentId(((JSONObject)arr.get(i)).getString("id"));
+            consent.setRequestId(requestObj.get("requestId").toString());
+            consentRepository.save(consent);
         }
         return "";
     }
 
     public Consent updateConsentRequestAfterOnFetch(JSONObject requestObj) {
         logger.info("Entering updateConsentRequestAfterOnFetch with data:" + requestObj);
-        Consent consent = consentRepository.findConsentByRequestId(requestObj.getJSONObject("resp").getString("requestId"));
+        Consent consent = consentRepository.findConsentByRequestId(requestObj.getJSONObject("resp").get("requestId").toString());
         requestObj = requestObj.getJSONObject("consent");
         consent.setStatus(requestObj.getString("status"));
         consent.setSignature(requestObj.getString("signature"));
@@ -177,6 +193,10 @@ public class ConsentRequestService {
         consent.setDataFrom(requestObj.getJSONObject("permission").getJSONObject("dateRange").getString("from"));
         consent.setDataTo(requestObj.getJSONObject("permission").getJSONObject("dateRange").getString("to"));
         consent.setDataEraseAt(requestObj.getJSONObject("permission").getString("dataEraseAt"));
+        HashMap<String, String> keys = receiverKeys();
+        consent.setReceiverPublicKey(keys.get("publicKey"));
+        consent.setReceiverPrivateKey(keys.get("privateKey"));
+        consent.setReceiverNonce(keys.get("random"));
         logger.info("exiting updateConsentRequestAfterOnFetch after saving consent" + consent);
         return consentRepository.save(consent);
     }
@@ -190,17 +210,22 @@ public class ConsentRequestService {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = prepareHeader(authToken);
 
+        logger.info("requestbody to cm healthrequest" + requestBody);
+
         HttpEntity<String> entity = new HttpEntity<String>(requestBody.toString(), headers);
-        consent.setRequestId(requestBody.getString("requestId"));
+        consent.setRequestId(requestBody.get("requestId").toString());
+
         consentRepository.save(consent);
         logger.info("exiting after saving data: consent" +consent);
+        logger.info("entity: " + entity.toString());
+
         restTemplate.postForObject(APIList.HEALTH_DATA_REQUEST, entity, String.class);
         return requestBody.get("requestId").toString();
     }
 
     public void updateConsentTransactionId(JSONObject requestBody) {
         logger.info("entering updateConsentTransactionId wiht data: " + requestBody);
-        Consent consent = consentRepository.findConsentByRequestId(requestBody.getJSONObject("resp").getString("requestId"));
+        Consent consent = consentRepository.findConsentByRequestId(requestBody.getJSONObject("resp").get("requestId").toString());
         consent.setStatus(requestBody.getJSONObject("hiRequest").getString("sessionStatus"));
         consent.setTransactionId(requestBody.getJSONObject("hiRequest").getString("transactionId"));
         consentRepository.save(consent);
@@ -234,5 +259,6 @@ public class ConsentRequestService {
             careContextRepository.save(tempCareContext);
             logger.info("saving carecontext : " + tempCareContext);
         }
+        consent.setStatus("DELIVERED");
     }
 }

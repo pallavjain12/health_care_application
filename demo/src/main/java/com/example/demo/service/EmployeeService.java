@@ -26,7 +26,7 @@ public class EmployeeService {
         JSONObject obj = new JSONObject();
         obj.put(StringConstants.STATUS, StringConstants.SUCCESSFULL);
         obj.put(StringConstants.MSG, "Employee added successfully");
-        obj.put(StringConstants.DATA, savedEmployee);
+        obj.put(StringConstants.DATA, savedEmployee.toJSONObject());
         logger.info("exiting with data: " + obj);
         return obj.toString();
     }
@@ -35,7 +35,7 @@ public class EmployeeService {
         logger.info("entering with data: " + id);
         Employee employee = employeeRepository.findEmployeeById(id);
         if (employee == null) {
-            return serverSideError("No Employee found with id: " + id);
+            return serverSideError("No Employee found with id: " + id).toString();
         }
         return employee.toString();
     }
@@ -47,7 +47,7 @@ public class EmployeeService {
             return EmployeeServiceHelper.convertToJSONSrtByRole(list);
         }
         catch(Exception e) {
-            return serverSideError(e.toString());
+            return serverSideError(e.toString()).toString();
         }
     }
 
@@ -59,19 +59,19 @@ public class EmployeeService {
             logger.info("Fetched employee : ");
             logger.info("employee object is null? " + (employee == null));
             if (employee == null) {
-                return serverSideError("Invalid email or password");
+                return serverSideError("Invalid email or password").toString();
             }
             else {
                 if (employee.isValidPassword(password)) {
                     return employee.toString();
                 }
                 else {
-                    return serverSideError("Invalid email or password");
+                    return serverSideError("Invalid email or password").toString();
                 }
             }
         }
         catch (Exception e) {
-            return serverSideError(e.toString());
+            return serverSideError(e.toString()).toString();
         }
     }
 }

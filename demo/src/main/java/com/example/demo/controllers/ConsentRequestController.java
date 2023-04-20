@@ -93,7 +93,7 @@ public class ConsentRequestController {
         logger.info("Exiting onFetch");
     }
 
-    @PostMapping("/v0.5/health-information/cm/on-request")
+    @PostMapping("/v0.5/health-information/hiu/on-request")
     @CrossOrigin
     public void onRequest(@RequestBody String str) {
         JSONObject requestBody = new JSONObject(str);

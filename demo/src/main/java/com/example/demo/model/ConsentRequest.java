@@ -16,12 +16,17 @@ public class ConsentRequest {
     private String purpose;
     @Column
     private String purposeCode;
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
     @JoinColumn(name = "patient_id", referencedColumnName = "id")
     private Patient patient;
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
     @JoinColumn(name = "doctor_id", referencedColumnName = "id")
     private Employee doctor;
+
+    @ManyToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
+    @JoinColumn(name = "visit_id", referencedColumnName = "id")
+    private Visit visit;
+
     @Column
     private String hiTypes;
     @Column
@@ -32,11 +37,11 @@ public class ConsentRequest {
     private String dateTo;
     @Column(nullable = false)
     private String dataEraseAt;
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String consentRequestId;
     @Column
     private String status;
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
     @JoinColumn(name = "consent_request_id", referencedColumnName = "id")
     List<Consent> consentList = new ArrayList<>();
     @Column
@@ -44,15 +49,33 @@ public class ConsentRequest {
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
     public String getConsentRequestId() { return consentRequestId; }
-    public void setConsentRequestId(String consentRequestId) { this.consentRequestId = consentRequestId; }
-    public String getPurpose() { return purpose; }
-    public void setPurpose(String purpose) { this.purpose = purpose; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public Employee getDoctor() { return doctor; }
-    public void setDoctor(Employee doctor) { this.doctor = doctor; }
-    public Patient getPatient() { return patient; }
-    public void setPatient(Patient patient) { this.patient = patient; }
+    public void setConsentRequestId(String consentRequestId) {
+        this.consentRequestId = consentRequestId;
+    }
+    public String getPurpose() {
+        return purpose;
+    }
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    public Employee getDoctor() {
+        return doctor;
+    }
+    public void setDoctor(Employee doctor) {
+        this.doctor = doctor;
+    }
+    public Patient getPatient() {
+        return patient;
+    }
+    public void setPatient(Patient patient) {
+        this.patient = patient;
+    }
 
     public String getPurposeCode() {
         return purposeCode;
@@ -133,5 +156,17 @@ public class ConsentRequest {
                 "\nStatus: " + status +
                 "\nconsentList: " + Arrays.toString(consentList.toArray()) +
                 "\nrequestId: " + requestId;
+    }
+
+    public Visit getVisit() {
+        return visit;
+    }
+
+    public void setVisit(Visit visit) {
+        this.visit = visit;
+    }
+
+    public void setConsentList(List<Consent> consentList) {
+        this.consentList = consentList;
     }
 }

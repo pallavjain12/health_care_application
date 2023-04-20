@@ -10,13 +10,13 @@ import org.springframework.http.MediaType;
 
 public class ResponseHelper {
     static Logger logger = LoggerFactory.getLogger(ResponseHelper.class);
-    public static String serverSideError(String e) {
+    public static JSONObject serverSideError(String e) {
         logger.info("Inside serverside error with string: " + e);
         JSONObject obj = new JSONObject();
         obj.put(StringConstants.STATUS, StringConstants.UNSUCCESSFULL);
         obj.put(StringConstants.MSG, "Error occurred. " + e);
         logger.info("Exiting serverSide error with String: " + obj.toString());
-        return obj.toString();
+        return obj;
     }
 
     public static HttpHeaders prepareHeader(String authToken) {

@@ -1,12 +1,14 @@
 package com.example.demo.helper.Service;
 
 import com.example.demo.model.Visit;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
+import java.lang.reflect.ParameterizedType;
 import java.time.LocalDate;
 
 import static com.example.demo.helper.misc.getRandomUUID;
@@ -20,6 +22,7 @@ public class VisitServiceHelper {
         logger.info("visit: " + visit);
         logger.info("patientId: " + patientId);
         logger.info("patientname: " + patientName);
+
         JSONObject request = new JSONObject();
         request.put("requestId", getRandomUUID());
         request.put("timestamp", getTimeStamp());
@@ -35,9 +38,11 @@ public class VisitServiceHelper {
         careContext.put("referenceNumber", visit.getReferenceNumber());
         careContext.put("display", visit.getDisplay());
         link.put("patient", pateint);
-        pateint.put("careContexts", careContext);
+        pateint.put("careContexts", new JSONArray());
+        pateint.getJSONArray("careContexts").put(careContext);
         request.put("link", link);
-        logger.info("Exiting prepareAddContextRequest with data: " + request.toString());
+
+        logger.info("Exiting prepareAddContextRequest with data: " + request);
         return request;
     }
 }

@@ -61,7 +61,7 @@ public class PatientServiceHelper {
         patient.setRegistrationDateTime(LocalDate.now());
         patient.setMobile(request.getString("mobile"));
         patient.setAbhaNumber(request.getString("abhaNumber"));
-        logger.info("Exiting createNewPatient with data: " + patient);
+        logger.info("Exiting createNewPatient with data: " + patient.getPatientJSONObject());
         return patient;
     }
 }

@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Entity
-public class Consent {
+public class ConsentHIP {
     @Id
     @GeneratedValue(strategy =  GenerationType.AUTO)
     private long id;
@@ -154,8 +154,8 @@ public class Consent {
                 "\naccessMode: " +accessMode +
                 "\ntransactionId: " + transactionId+
                 "\nreceiverPublicKey: " +receiverPublicKey +
-                "\nreceiverPrivateKey" + receiverPrivateKey+
-                "\nreceiveNonce" +receiverNonce +
+                "\n: receiverPrivateKey" + receiverPrivateKey+
+                "\n: receiveNonce" +receiverNonce +
                 "\nrequestId: " +requestId +
                 "\ndataFrom: " + dataFrom+
                 "\ndataTo: " + dataTo+

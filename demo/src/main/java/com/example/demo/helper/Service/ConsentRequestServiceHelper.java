@@ -71,24 +71,25 @@ public class ConsentRequestServiceHelper {
         logger.info("Entering prepareHealthInformationCMRequest with data: consent = " + consent);
         JSONObject response = new JSONObject();
         response.put("requestId", getRandomUUID());
-        response.put("timeStamp", getTimeStamp());
+        response.put("timestamp", getTimeStamp());
         response.put("hiRequest", new JSONObject());
 
         response.getJSONObject("hiRequest").put("consent", new JSONObject());
         response.getJSONObject("hiRequest").getJSONObject("consent").put("id", consent.getConsentId());
 
         response.getJSONObject("hiRequest").put("dateRange", new JSONObject());
-        response.getJSONObject("hiRequest").getJSONObject("dateRange").put("from", consent.getDataFrom());
-        response.getJSONObject("hiRequest").getJSONObject("dateRange").put("to", consent.getDataTo());
+        response.getJSONObject("hiRequest").getJSONObject("dateRange").put("from", consent.getDataFrom() + "Z");
+        response.getJSONObject("hiRequest").getJSONObject("dateRange").put("to", consent.getDataTo() + "Z");
 
         response.getJSONObject("hiRequest").put("dataPushUrl", StringToChange.DATA_PUSH_URL);
 
         response.getJSONObject("hiRequest").put("keyMaterial", new JSONObject());
         response.getJSONObject("hiRequest").getJSONObject("keyMaterial").put("cryptoAlg", StringConstants.CRYPTO_ALGO);
+        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").put("curve", "Curve25519");
 
         response.getJSONObject("hiRequest").getJSONObject("keyMaterial").put("dhPublicKey", new JSONObject());
-        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("expiry", "2023-06-05T01:02:03.0009Z");
-        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("parameters", "Ephemeral public key");
+        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("expiry", "2022-06-05T01:02:03.0009Z");
+        response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("parameters", "Curve25519/32byte random key");
         response.getJSONObject("hiRequest").getJSONObject("keyMaterial").getJSONObject("dhPublicKey").put("keyValue", consent.getReceiverPublicKey());
         response.getJSONObject("hiRequest").getJSONObject("keyMaterial").put("nonce", consent.getReceiverNonce());
         logger.info("exiting prepareHealthInformationCMRequest with data : " + response);

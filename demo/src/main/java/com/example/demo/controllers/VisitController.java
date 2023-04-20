@@ -31,7 +31,7 @@ public class VisitController {
         JSONObject obj = new JSONObject(request);
         String patient_id = obj.getString("patientId");
         String patientAuthToken = obj.getString("accessToken");
-        logger.info("Entering addNewVisitClass wtih data: patientId - " + patient_id + " authToken: " + patientAuthToken);
+        logger.info("Entering addNewVisitClass with data: patientId - " + patient_id + " authToken: " + patientAuthToken);
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
 
         Patient patient = patientRepository.findPatientById(Long.parseLong(patient_id));
@@ -65,9 +65,20 @@ public class VisitController {
             map.remove(respond[0]);
         }
         catch (Exception e) {
-            System.out.println(e);
+            logger.error("error occurred: " + e);
             emitter.complete();
             map.remove(respond[0]);
         }
+    }
+
+    @PatchMapping("/update-visit")
+    public String updateVisit(@RequestBody String req) {
+        logger.info("entering update visit with req: " + req);
+        return visitService.updatePrescription(req).toString();
+    }
+
+    @GetMapping("/visit")
+    public String getVisit(@RequestBody String req) {
+        return visitService.getVisitById(req);
     }
 }

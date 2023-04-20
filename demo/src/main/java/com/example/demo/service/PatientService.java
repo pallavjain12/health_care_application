@@ -59,7 +59,7 @@ public class PatientService {
         }
 
         ans[1] = respond.toString();
-        ans[0] = obj.getJSONObject("resp").getString("requestId");
+        ans[0] = obj.getJSONObject("resp").get("requestId").toString();
         logger.info("Entering prepareOnGenerateResponse with data: " + ans.toString() );
         return ans;
     }

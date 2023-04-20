@@ -17,6 +17,7 @@ import static com.example.demo.helper.DataEncrypterDecrypter.receiverKeys;
 import static com.example.demo.helper.FHIRJSON.prepareFHIRJSONString;
 import static com.example.demo.helper.misc.getRandomUUID;
 import static com.example.demo.helper.misc.getTimeStamp;
+import com.example.demo.model.ConsentHIP;
 
 public class DataTransferServiceHelper {
 
@@ -50,7 +51,7 @@ public class DataTransferServiceHelper {
         response.put("acknowledgement", new JSONObject());
         response.getJSONObject("acknowledgement").put("status", "OK");
         response.getJSONObject("acknowledgement").put("consentId", ids[0]);
-        logger.info("Exiting prepareOnNotifyRequestObject with data: " + response.toString());
+        logger.info("Exiting prepareOnNotifyRequestObject with data: " + response);
         return response;
     }
 
@@ -70,7 +71,7 @@ public class DataTransferServiceHelper {
         return response;
     }
 
-    public static JSONObject prepareDataToTransfer(Consent consent, JSONObject requestObj) {
+    public static JSONObject prepareDataToTransfer(ConsentHIP consent, JSONObject requestObj) {
         logger.info("Entering prepareDataToTransfer with data: ");
         logger.info("Consent : " + consent);
         logger.info("requestObj: " + requestObj);
@@ -113,7 +114,7 @@ public class DataTransferServiceHelper {
         return dataObject;
     }
 
-    public static JSONObject prepareDeliveredNotification(JSONObject object, JSONObject requestObj, Consent consent) {
+    public static JSONObject prepareDeliveredNotification(JSONObject object, JSONObject requestObj, ConsentHIP consent) {
         logger.info("Entering prepareDeliveredNotification with data: ");
         logger.info("object: " + object.toString());
         logger.info("requestObj " + requestObj.toString());

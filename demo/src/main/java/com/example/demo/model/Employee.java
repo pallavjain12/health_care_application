@@ -65,6 +65,7 @@ public class Employee {
         obj.put("mobile", getMobile());
         obj.put("email", getEmail());
         obj.put("type", getRole());
+        obj.put("registrationNumber", getRegistrationNumber());
         return obj.toString();
     }
 
@@ -75,6 +76,7 @@ public class Employee {
         employee.put("email", getName());
         employee.put("role", getRole());
         employee.put("mobile", getMobile());
+        employee.put("registrationNumber", getRegistrationNumber());
         return employee;
     }
 

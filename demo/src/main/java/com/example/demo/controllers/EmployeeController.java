@@ -31,7 +31,7 @@ public class EmployeeController {
         }
         catch (Exception e) {
             logger.error("Error occured while adding employee: " + e);
-            return serverSideError(e.toString());
+            return serverSideError(e.toString()).toString();
         }
     }
 
@@ -44,7 +44,7 @@ public class EmployeeController {
         }
         catch (Exception e) {
             logger.error("Error occurred while getting employee: " + e);
-            return serverSideError(e.toString());
+            return serverSideError(e.toString()).toString();
         }
     }
 
@@ -57,7 +57,7 @@ public class EmployeeController {
         }
         catch (Exception e) {
             logger.error("error occurred while getting employees: " + e);
-            return serverSideError(e.toString());
+            return serverSideError(e.toString()).toString();
         }
     }
 
@@ -69,7 +69,7 @@ public class EmployeeController {
             return employeeService.loginCredentialsCheck(map.get(StringConstants.EMAIL), map.get(StringConstants.PASSWORD));
         }
         catch (Exception e) {
-            return serverSideError(e.toString());
+            return serverSideError(e.toString()).toString();
         }
     }
 }

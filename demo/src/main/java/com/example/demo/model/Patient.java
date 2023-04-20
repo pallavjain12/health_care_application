@@ -43,10 +43,10 @@ public class Patient {
     private String gender;
     @Column
     private LocalDate registrationDateTime;
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "patient", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "patient", cascade = CascadeType.DETACH)
     private List<Visit> visits = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "patient", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "patient", cascade = CascadeType.DETACH)
     private List<ConsentRequest> consents = new ArrayList<>();
 
     public long getId() { return id; }
@@ -113,6 +113,7 @@ public class Patient {
 
     public void addVisits(Visit visit) {
         this.visits.add(visit);
+        visit.setPatient(this);
     }
 
     public JSONObject getPatientJSONObject() {
@@ -121,7 +122,7 @@ public class Patient {
         obj.put("name", name);
         obj.put("abha_id", abhaId);
         obj.put("abha_number", abhaNumber);
-        obj.put("age", getAge());
+        obj.put("age", "" + getAge());
         obj.put("gender", gender);
         obj.put("mobile", mobile);
         obj.put("email", email);

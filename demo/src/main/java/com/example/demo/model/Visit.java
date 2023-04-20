@@ -1,9 +1,11 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.ColumnDefault;
+import org.json.JSONObject;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Visit {
@@ -22,7 +24,7 @@ public class Visit {
     private String referenceNumber;
     @Column
     private String display;
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
     @JoinColumn(name = "patient_id", referencedColumnName = "id")
     private Patient patient;
     @ManyToOne
@@ -33,6 +35,9 @@ public class Visit {
     private String requestId;
     @Column
     private boolean isDisabled = false;
+
+    @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
+    List<ConsentRequest> consentRequestList = new ArrayList<>();
 
     public Visit(LocalDate visitDate, String referenceNumber, String display) {
         this.visitDate = visitDate;
@@ -92,7 +97,7 @@ public class Visit {
                 "\nreferenceNumber: " + referenceNumber+
                 "\ndisplay: " + display +
                 "\nRequestId: " + requestId +
-                "\nisDisables: " + isDisabled;
+                "\nisDisabled: " + isDisabled;
 
     }
 
@@ -114,5 +119,31 @@ public class Visit {
 
     public void setDisabled(boolean disabled) {
         isDisabled = disabled;
+    }
+
+    public JSONObject getJSONObject() {
+        JSONObject obj = new JSONObject();
+        obj.put("id", "" + id);
+        obj.put("prescription", prescription);
+        obj.put("diagnosis", diagnosis);
+        obj.put("dosageInstruction", dosageInstruction);
+        obj.put("visitDate", visitDate);
+        obj.put("referenceNumber", referenceNumber);
+        obj.put("display", display);
+        obj.put("isDisabled", isDisabled);
+        return obj;
+    }
+
+    public List<ConsentRequest> getConsentRequestList() {
+        return consentRequestList;
+    }
+
+    public void setConsentRequestList(List<ConsentRequest> consentRequestList) {
+        this.consentRequestList = consentRequestList;
+    }
+
+    public void addConsentRequest(ConsentRequest consentRequest) {
+        consentRequest.setVisit(this);
+        this.consentRequestList.add(consentRequest);
     }
 }
