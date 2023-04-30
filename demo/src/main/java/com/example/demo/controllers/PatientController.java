@@ -20,11 +20,10 @@ public class PatientController {
     PatientService patientService;
     private static HashMap<String, SseEmitter> emittersMap = new HashMap<>();
 
-    @PostMapping("/generate-otp")
-    SseEmitter generateOTP(@RequestBody HashMap<String, String> requestParams) {
-        logger.info("Entering generateOTP with data" + requestParams);
+    @GetMapping("/generate-otp")
+    SseEmitter generateOTP(@RequestParam("abhaId") String abhaId) {
+        logger.info("Entering generateOTP with request param abhaId as " + abhaId);
         logger.info("currently map is " + emittersMap);
-        String abhaId = requestParams.get(StringConstants.ABHAID);
         SseEmitter sseEmitter = new SseEmitter(Long.MAX_VALUE);
 
         String reqId = patientService.fireABDMGenerateOTP(abhaId);
@@ -65,11 +64,9 @@ public class PatientController {
         }
     }
 
-    @PostMapping("/confirm-otp")
-    public SseEmitter confirmOTP(@RequestBody HashMap<String, String> request) {
-        logger.info("Entering confirmOTP with data: " + request);
-        String transactionId = request.get("transactionId");
-        String otp = request.get("otp");
+    @GetMapping("/confirm-otp")
+    public SseEmitter confirmOTP(@RequestParam("transactionId") String transactionId, @RequestParam("otp") String otp) {
+        logger.info("Entering confirmOTP with transactionId: " + transactionId + " otp: " + otp);
 
         SseEmitter sseEmitter = new SseEmitter(Long.MAX_VALUE);
         try {

@@ -21,13 +21,13 @@ public class Patient {
     @Column(unique = true)
     private String abhaId;
 
-    @Column(unique = true)
+    @Column
     private String abhaNumber;
 
-    @Column(unique = true)
+    @Column
     private String email;
 
-    @Column(unique = true)
+    @Column
     private String mobile;
 
     @Column

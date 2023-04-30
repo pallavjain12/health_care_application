@@ -26,6 +26,9 @@ public class PatientService {
     @Autowired
     PatientRepository patientRepository;
 
+    @Autowired
+    VisitService visitService;
+
     public String fireABDMGenerateOTP(String abhaId) {
         logger.info("enteing fireABDM with data: " + abhaId);
         String authToken = TokenUtil.getAccessToken();
@@ -81,7 +84,6 @@ public class PatientService {
     }
 
     public JSONObject prepareOnConfirmOTPResponse(String response) {
-        String[] ans = new String[2];
 
         JSONObject obj = new JSONObject(response);
         if (!obj.isNull("error")) {
@@ -115,6 +117,8 @@ public class PatientService {
         finalObj.put(StringConstants.STATUS, StringConstants.SUCCESSFULL);
         finalObj.put(StringConstants.MSG, "Data fetched successfully");
         finalObj.put(StringConstants.DATA, respond);
+
+
         return finalObj;
     }
 }

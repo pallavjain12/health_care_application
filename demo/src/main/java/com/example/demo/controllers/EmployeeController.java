@@ -4,6 +4,7 @@ import com.example.demo.constants.StringConstants;
 import com.example.demo.model.Employee;
 import com.example.demo.service.EmployeeService;
 import jakarta.persistence.Column;
+import jdk.jfr.ContentType;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public class EmployeeController {
         }
     }
 
-    @GetMapping("/employees")
+    @GetMapping(value = "/employees", produces = "Application/json")
     @CrossOrigin
     public String getAllEmployees() {
         logger.info("Entering getAllEmployees with no data");
@@ -61,7 +62,7 @@ public class EmployeeController {
         }
     }
 
-    @GetMapping("/login")
+    @PostMapping(value = "/login", produces = "application/json")
     @CrossOrigin
     public String login(@RequestBody HashMap<String, String> map) {
         logger.info("Entering login with data: " + map);

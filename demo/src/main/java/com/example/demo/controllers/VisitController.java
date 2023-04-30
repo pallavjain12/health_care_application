@@ -25,12 +25,9 @@ public class VisitController {
     VisitService visitService;
 
     private static HashMap<String, SseEmitter> map = new HashMap<>();
-    @PostMapping("/add-visit")
+    @GetMapping("/add-visit")
     @CrossOrigin
-    public SseEmitter addNewVisit(@RequestBody String request) {
-        JSONObject obj = new JSONObject(request);
-        String patient_id = obj.getString("patientId");
-        String patientAuthToken = obj.getString("accessToken");
+    public SseEmitter addNewVisit(@RequestParam("patientId") String patient_id, @RequestParam("accessToken") String patientAuthToken) {
         logger.info("Entering addNewVisitClass with data: patientId - " + patient_id + " authToken: " + patientAuthToken);
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
 
