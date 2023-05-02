@@ -4,6 +4,7 @@ import com.example.demo.constants.StringConstants;
 import com.example.demo.helper.Service.EmployeeServiceHelper;
 import com.example.demo.model.Employee;
 import com.example.demo.repository.EmployeeRepository;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,13 @@ public class EmployeeService {
         logger.info("Entering getALlEmployee with no data");
         try {
             List<Employee> list = employeeRepository.findAll();
-            return EmployeeServiceHelper.convertToJSONSrtByRole(list);
+            JSONObject obj  = new JSONObject();
+            JSONArray array = new JSONArray();
+            for (Employee employee : list) {
+                array.put(employee.toJSONObject());
+            }
+            obj.put("posts", array);
+            return obj.toString();
         }
         catch(Exception e) {
             return serverSideError(e.toString()).toString();
@@ -73,5 +80,23 @@ public class EmployeeService {
         catch (Exception e) {
             return serverSideError(e.toString()).toString();
         }
+    }
+
+    public String updateEmployee(JSONObject obj) {
+        System.out.println(obj);
+        Employee dbEmployee = employeeRepository.findEmployeeById(Long.parseLong(obj.getString("id")));
+        if (!obj.isNull("email")) dbEmployee.setEmail(obj.getString("email"));
+        if (!obj.isNull("name")) dbEmployee.setName(obj.getString("name"));
+        if (!obj.isNull("mobile")) dbEmployee.setMobile(obj.getString("mobile"));
+        if (!obj.isNull("role")) dbEmployee.setRole(obj.getString("role"));
+        employeeRepository.save(dbEmployee);
+        return dbEmployee.toJSONObject().toString();
+    }
+
+    public String deleteEmployee(JSONObject obj) {
+        Employee dbEmployee = employeeRepository.findEmployeeById(Long.parseLong(obj.getString("id")));
+        dbEmployee.setActive(false);
+        employeeRepository.save(dbEmployee);
+        return "Deleted successfully";
     }
 }

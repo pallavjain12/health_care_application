@@ -71,11 +71,11 @@ public class Employee {
 
     public JSONObject toJSONObject() {
         JSONObject employee = new JSONObject();
-        employee.put("id", getId());
+        employee.put("id", "" + getId());
         employee.put("name", getName());
         employee.put("email", getName());
         employee.put("role", getRole());
-        employee.put("mobile", getMobile());
+        employee.put("mobile", "" + getMobile());
         employee.put("registrationNumber", getRegistrationNumber());
         return employee;
     }

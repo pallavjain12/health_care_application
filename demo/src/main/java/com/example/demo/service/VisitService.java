@@ -68,6 +68,7 @@ public class VisitService {
         // Prepare requestBody to send to ABDM.
         JSONObject request = prepareAddContextRequest(patientAuthToken, visit, "" + patient.getId(), patient.getName());
         visit.setRequestId(request.get("requestId").toString());
+        visit.setVisitDate(LocalDate.now());
         visitRepository.save(visit);
 
         // Send request to ABDM
@@ -134,7 +135,21 @@ public class VisitService {
         JSONObject obj = new JSONObject(req);
         JSONObject response = new JSONObject();
         Visit visit = visitRepository.findVisitById(obj.getLong("visitId"));
-        if (visit == null)  return serverSideError("No visit found with id: " + obj.getString("visitId")).toString();
+
+        if (visit == null) {
+            JSONObject res = new JSONObject();
+            res.put(StringConstants.STATUS, StringConstants.UNSUCCESSFULL);
+            res.put(StringConstants.MSG, "Visit with id : " + obj.getString("visitId") + " not found");
+            return res.toString();
+        }
+
+        if (visit.getDoctor() != null && visit.getDoctor().getId() != Long.parseLong(obj.getString("doctorId"))) {
+            JSONObject res = new JSONObject();
+            res.put(StringConstants.STATUS, StringConstants.UNSUCCESSFULL);
+            res.put(StringConstants.MSG, "Not authorized to view this visit");
+            return res.toString();
+        }
+
         Patient patient = visit.getPatient();
         Employee doctor = employeeRepository.findEmployeeById(obj.getLong("doctorId"));
         response.put("visit", visit.getJSONObject());
@@ -143,7 +158,13 @@ public class VisitService {
         response.put("consentRequests", prepareConsentRequest(visit));
         logger.info("exiting getVisitById with data: " + response);
 
-        return response.toString();
+        JSONObject object = new JSONObject();
+        object.put(StringConstants.STATUS, StringConstants.SUCCESSFULL);
+        object.put(StringConstants.MSG, "Visit Fetched Successfully");
+        object.put(StringConstants.DATA, response);
+
+
+        return object.toString();
     }
 
     public JSONArray prepareOldVisit(Patient patient, Employee doctor) {

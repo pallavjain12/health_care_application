@@ -73,4 +73,14 @@ public class EmployeeController {
             return serverSideError(e.toString()).toString();
         }
     }
+
+    @PutMapping(value = "/employee", produces = "Application/JSON")
+    public String editEmployee(@RequestBody String obj) {
+        return employeeService.updateEmployee(new JSONObject(obj));
+    }
+
+    @DeleteMapping(value = "/employee")
+    public String deleteEmployee(@RequestBody String str) {
+        return employeeService.deleteEmployee(new JSONObject(str));
+    }
 }

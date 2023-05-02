@@ -74,7 +74,7 @@ public class VisitController {
         return visitService.updatePrescription(req).toString();
     }
 
-    @GetMapping("/visit")
+    @GetMapping(value = "/visit", produces = "Application/JSON")
     public String getVisit(@RequestBody String req) {
         return visitService.getVisitById(req);
     }

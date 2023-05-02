@@ -57,7 +57,7 @@ public class ConsentRequestService {
         consentRequest.setDataEraseAt((requestObj.getString("dateEraseAt")));
         consentRequest.setAccessMode("VIEW");
 
-        consentRequest.setHiTypes(requestObj.getJSONArray("hiTypes").toString());
+        consentRequest.setHiTypes(requestObj.get("hiTypes").toString());
         consentRequest.setPatient(patientRepository.findPatientById(Long.parseLong(requestObj.getString("patientId"))));
         consentRequest.setDoctor(employeeRepository.findEmployeeById(Long.parseLong(requestObj.getString("doctorId"))));
 
@@ -185,8 +185,8 @@ public class ConsentRequestService {
         for (int i = 0; i < careContextArr.length(); i++) {
             JSONObject cc = (JSONObject) careContextArr.get(i);
             CareContext careContext = new CareContext(cc.getString("patientReference"), cc.getString("careContextReference"));
-            careContextRepository.save(careContext);
             consent.addCareContext(careContext);
+            careContextRepository.save(careContext);
         }
         consent.setHiTypes(requestObj.getJSONArray("hiTypes").toString());
         consent.setAccessMode(requestObj.getJSONObject("permission").getString("accessMode"));
@@ -234,8 +234,8 @@ public class ConsentRequestService {
     public void saveData(JSONObject data) {
         logger.info("Entering save data with data: " + data);
         Consent consent = consentRepository.findConsentByTransactionId(data.getString("transactionId"));
-        String senderPublicKey = data.getJSONObject("dhPublicKey").getString("keyValue");
-        String senderNonce = data.getString("nonce");
+        String senderPublicKey = data.getJSONObject("keyMaterial").getJSONObject("dhPublicKey").getString("keyValue");
+        String senderNonce = data.getJSONObject("keyMaterial").getString("nonce");
         String receiverNonce = consent.getReceiverNonce();
         String receiverPrivateKey = consent.getReceiverPrivateKey();
         JSONArray arr = data.getJSONArray("entries");

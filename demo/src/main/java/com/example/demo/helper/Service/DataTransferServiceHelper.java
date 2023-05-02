@@ -37,7 +37,7 @@ public class DataTransferServiceHelper {
         careContext.setDoctorId("" + visit.getDoctor().getId());
         careContext.setPatientId("" + visit.getPatient().getId());
         careContext.setPatientName("" + visit.getPatient().getName());
-        logger.info("Exiting convertVisitIntoCareContext with data: " + careContext);
+        logger.info("Exiting convertVisitIntoCareContext with created carecontext: " + careContext);
         return careContext;
     }
 
@@ -72,7 +72,7 @@ public class DataTransferServiceHelper {
     }
 
     public static JSONObject prepareDataToTransfer(ConsentHIP consent, JSONObject requestObj) {
-        logger.info("Entering prepareDataToTransfer with data: ");
+        logger.info("Entering prepareDataToTransfer with data: --\\/---");
         logger.info("Consent : " + consent);
         logger.info("requestObj: " + requestObj);
         String txnId = requestObj.getString("transactionId");
@@ -110,7 +110,7 @@ public class DataTransferServiceHelper {
             entryObject.put("careContextReference", careContext.getCareContextReference());
             dataObject.getJSONArray("entries").put(entryObject);
         }
-        logger.info("Exiting prepareDataToTransfer with data: " + dataObject.toString());
+        logger.info("Exiting prepareDataToTransfer with data: " + dataObject);
         return dataObject;
     }
 

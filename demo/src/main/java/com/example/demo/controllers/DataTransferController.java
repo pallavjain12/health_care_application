@@ -20,7 +20,7 @@ public class DataTransferController {
     @CrossOrigin
     public void hipNotify(@RequestBody String str) {
         JSONObject requestBody = new JSONObject(str);
-        logger.info("Entering hip notify with data: " + requestBody);
+        logger.info("Entering /v0.5/consents/hip/notify with data: " + requestBody);
 
         String[] ids = dataTransferService.saveHIPNotifyConsent(requestBody);
 
@@ -33,11 +33,16 @@ public class DataTransferController {
     @CrossOrigin
     public void dataTransferRequest(@RequestBody String str) {
         JSONObject requestObj = new JSONObject(str);
-        logger.info("Entering hip data transfer request with data: " + requestObj);
-        dataTransferService.fireABDMRequestAcknowledgement(requestObj);
+        logger.info("Entering /v0.5/health-information/hip/request with data: " + requestObj);
+
+        // dataTransferService.fireABDMRequestAcknowledgement(requestObj);
+
         JSONObject obj = dataTransferService.prepareAndSendData(requestObj);
+
         logger.info("sent data to consent request: " + obj.toString());
-        dataTransferService.sendDataTransferCompletedNotification(obj, requestObj);
+
+        // dataTransferService.sendDataTransferCompletedNotification(obj, requestObj);
+
         logger.info("Exiting dataTransferRequest");
     }
 }

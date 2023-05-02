@@ -40,6 +40,11 @@ public class DataTransferService {
     CareContextRepository careContextRepository;
     public String[] saveHIPNotifyConsent(JSONObject notification) {
         logger.info("entering saveHIPNotifyConsent with data: " + notification);
+        ConsentHIP temp = consentHIPRepository.findConsentHIPByConsentId(notification.getJSONObject("notification").getString("consentId"));
+        if (temp  != null) {
+            temp.setRequestId(notification.get("requestId").toString());
+            return new String[]{notification.getJSONObject("notification").getString("consentId"), notification.get("requestId").toString()};
+        }
 
         ConsentHIP consent = new ConsentHIP();
         consent.setRequestId(notification.get("requestId").toString());
@@ -51,17 +56,23 @@ public class DataTransferService {
         notification = notification.getJSONObject("consentDetail");
 
         JSONArray arr = notification.getJSONArray("careContexts");
+        logger.info("care contexts array is : " + arr.toString());
+        logger.info("care contexts array length is :" + arr.length());
         for (int i = 0 ; i < arr.length(); i++) {
             JSONObject obj = (JSONObject) arr.get(i);
             Visit visit = visitRepository.findVisitByReferenceNumber(obj.getString("careContextReference"));
-            System.out.println("care context not found " + obj.getString("careContextReference"));
-            if (visit == null)  continue;
+
+            if (visit == null) {
+                System.out.println("care context not found " + obj.getString("careContextReference"));
+                continue;
+            }
 
             // This indicates that the visit has not been finished; a visit was made, but the patient has not seen the doctor.
             if (!visit.isDisabled()) continue;
             CareContext careContext = convertVisitIntoCareContext(visit);
-            careContextRepository.save(careContext);
+            logger.info("converted careContext in HIP Request : " + careContext);
             consent.addCareContext(careContext);
+            careContextRepository.save(careContext);
         }
         consent.setHiTypes(notification.getJSONArray("hiTypes").toString());
         consent.setAccessMode(notification.getJSONObject("permission").getString("accessMode"));
@@ -100,8 +111,8 @@ public class DataTransferService {
 
     public JSONObject prepareAndSendData(JSONObject requestObj) {
         logger.info("entering prepareAndSendData with data: " + requestObj);
-        ConsentHIP consent = consentHIPRepository.findConsentHIPByConsentId(requestObj.getJSONObject("hiRequest").getJSONObject("consent").getString("id"));
-        JSONObject object = prepareDataToTransfer(consent, requestObj);
+        ConsentHIP consentHIP = consentHIPRepository.findConsentHIPByConsentId(requestObj.getJSONObject("hiRequest").getJSONObject("consent").getString("id"));
+        JSONObject object = prepareDataToTransfer(consentHIP, requestObj);
         String dataPushUrl = requestObj.getJSONObject("hiRequest").getString("dataPushUrl");
 
         HttpHeaders headers = prepareHeader(getAccessToken());

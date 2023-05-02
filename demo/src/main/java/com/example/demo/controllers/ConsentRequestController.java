@@ -7,12 +7,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.service.ConsentRequestService;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.HashMap;
@@ -24,12 +21,29 @@ public class ConsentRequestController {
     ConsentRequestService consentRequestService;
     HashMap<String, SseEmitter> map = new HashMap<>();
 
-    @PostMapping("/create-consent-request")
+    @GetMapping("/create-consent-request")
     @CrossOrigin
-    public SseEmitter consentRequestInit(@RequestBody String req) {
-        logger.info("Entering consentRequestInit with requestBody: " + req);
+    public SseEmitter consentRequestInit(@RequestParam("purpose") String purpose,
+                                            @RequestParam("dateFrom") String dateFrom,
+                                            @RequestParam("dateTo") String dateTo,
+                                            @RequestParam("dateEraseAt") String dateEraseAt,
+                                            @RequestParam("hiTypes") String hiTypes,
+                                            @RequestParam("patientId") String patientId,
+                                            @RequestParam("doctorId") String doctorId,
+                                            @RequestParam("visitId") String visitId) {
+
+        logger.info("Entering /create-consent-request with requestBody: ");
         logger.info("currently emitter map is " + map);
-        ConsentRequest consentRequest = consentRequestService.prepareConsentRequest(req);
+        JSONObject req = new JSONObject();
+        req.put("purpose", purpose);
+        req.put("dateFrom", dateFrom);
+        req.put("dateTo", dateTo);
+        req.put("dateEraseAt", dateEraseAt);
+        req.put("hiTypes", "[" + hiTypes + "]");
+        req.put("patientId", patientId);
+        req.put("doctorId", doctorId);
+        req.put("visitId", visitId);
+        ConsentRequest consentRequest = consentRequestService.prepareConsentRequest(req.toString());
         logger.info("Prepared consent");
         if (consentRequest == null) throw new RuntimeException();
         String requestId = consentRequestService.fireABDMConsentRequestInit(consentRequest);
@@ -44,14 +58,14 @@ public class ConsentRequestController {
             logger.error("Exception occurred while sending event: " + e);
         }
         map.put(requestId, sseEmitter);
-        logger.info("Exiting consentRequestInit class and sending sseEmitter");
+        logger.info("Exiting /create-consent-request class and sending sseEmitter");
         return sseEmitter;
     }
 
     @PostMapping("/v0.5/consent-requests/on-init")
     @CrossOrigin
     public void onConsentRequestInit(@RequestBody String responseBody) {
-        logger.info("Entering onConsentRequestInit with responseBody: " + responseBody);
+        logger.info("Entering /v0.5/consent-requests/on-init with responseBody: " + responseBody);
         logger.info("currently emitter map is " + map);
         String[] response = consentRequestService.prepareOnConsentRequestInitResponse(responseBody);
         SseEmitter sseEmitter = map.get(response[0]);
@@ -69,37 +83,37 @@ public class ConsentRequestController {
             sseEmitter.complete();
             map.remove(response[0]);
         }
-        logger.info("Exiting onInit");
+        logger.info("Exiting /v0.5/consent-requests/on-init");
     }
 
     @PostMapping("/v0.5/consents/hiu/notify")
     @CrossOrigin
     public void hiuConsentNotify(@RequestBody String str) {
         JSONObject requestBody = new JSONObject(str);
-        logger.info("Entering hiuConsentNotifyClass with requestBody: " + requestBody);
+        logger.info("Entering /v0.5/consents/hiu/notify with requestBody: " + requestBody);
         boolean consentGranted = consentRequestService.updateConsentRequestStatus(requestBody);
         logger.info("Consent granted = " + consentGranted);
         if (consentGranted) consentRequestService.fireArtifactsFetchRequest(requestBody.getJSONObject("notification").getJSONArray("consentArtefacts"));
-        logger.info("Exiting hiuConsentNotify");
+        logger.info("Exiting /v0.5/consents/hiu/notify");
     }
 
     @PostMapping("/v0.5/consents/on-fetch")
     @CrossOrigin
     public void onFetch(@RequestBody String str) {
         JSONObject requestBody = new JSONObject(str);
-        logger.info("Entering onFetch method with requestBody: " + requestBody);
+        logger.info("Entering /v0.5/consents/on-fetch with requestBody: " + requestBody);
         Consent consent = consentRequestService.updateConsentRequestAfterOnFetch(requestBody);
         consentRequestService.fireABDMHealthInformationCMRequest(consent);
-        logger.info("Exiting onFetch");
+        logger.info("Exiting /v0.5/consents/on-fetch");
     }
 
     @PostMapping("/v0.5/health-information/hiu/on-request")
     @CrossOrigin
     public void onRequest(@RequestBody String str) {
         JSONObject requestBody = new JSONObject(str);
-        logger.info("Entering onRequest method with requestBody: " + requestBody);
+        logger.info("Entering /v0.5/health-information/hiu/on-request with requestBody: " + requestBody);
         consentRequestService.updateConsentTransactionId(requestBody);
-        logger.info("Exiting onRequest");
+        logger.info("Exiting /v0.5/health-information/hiu/on-request");
     }
 
     @PostMapping("/data/push")

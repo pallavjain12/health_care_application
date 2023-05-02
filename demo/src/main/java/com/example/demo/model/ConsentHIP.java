@@ -32,7 +32,7 @@ public class ConsentHIP {
     @Column
     private String requestId;
     @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
-    @JoinColumn(name = "consent_id", referencedColumnName = "consentId")
+    @JoinColumn(name = "consenthip_id", referencedColumnName = "id")
     List<CareContext> careContextList = new ArrayList<>();
 
     @Column
@@ -154,8 +154,8 @@ public class ConsentHIP {
                 "\naccessMode: " +accessMode +
                 "\ntransactionId: " + transactionId+
                 "\nreceiverPublicKey: " +receiverPublicKey +
-                "\n: receiverPrivateKey" + receiverPrivateKey+
-                "\n: receiveNonce" +receiverNonce +
+                "\nreceiverPrivateKey" + receiverPrivateKey+
+                "\nreceiveNonce" +receiverNonce +
                 "\nrequestId: " +requestId +
                 "\ndataFrom: " + dataFrom+
                 "\ndataTo: " + dataTo+

@@ -32,7 +32,7 @@ public class Consent {
     @Column
     private String requestId;
     @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
-    @JoinColumn(name = "consent_id", referencedColumnName = "consentId")
+    @JoinColumn(name = "consent_id", referencedColumnName = "id")
     List<CareContext> careContextList = new ArrayList<>();
 
     @Column

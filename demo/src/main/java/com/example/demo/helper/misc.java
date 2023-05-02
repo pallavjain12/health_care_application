@@ -15,7 +15,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.UUID;
+
+import static com.example.demo.helper.DataEncrypterDecrypter.*;
 
 public class misc {
 
@@ -32,7 +35,24 @@ public class misc {
     }
 
     public static void main(String[] args) {
-        String date = "1998-06-15T00:00:00.00000001";
-        System.out.println(ZonedDateTime.of(LocalDateTime.parse(date), ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+        HashMap<String, String> keys = receiverKeys();
+        String receiverPublicKey = keys.get("publicKey");
+        String receiverPrivateKey = keys.get("privateKey");
+        String receiverRandom = keys.get("random");
+
+        keys = receiverKeys();
+        String senderPublicKey = keys.get("publicKey");
+        String senderPrivateKey = keys.get("privateKey");
+        String senderRandom = keys.get("random");
+
+        String myData = "Nuclear Launch codes : 3h4b5b6n4j2oe90bn43n2k";
+
+        String encrptedData = encryptFHIRData(receiverPublicKey, receiverRandom, myData, senderPrivateKey, senderRandom);
+
+        System.out.println("encrptedData = " + encrptedData);
+
+        String decryptedData = decrypt(encrptedData, senderPublicKey, senderRandom,receiverPrivateKey, receiverRandom);
+
+        System.out.println(decryptedData);
     }
 }
